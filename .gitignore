@@ -1,0 +1,6 @@
+# Ignore compiled executables
+*.exe
+server.exe
+
+# Ignore VS Code settings (optional)
+.vscode/
