@@ -48,6 +48,10 @@
         <button class="btn-green" onclick="processAdmin()" style="margin-bottom: 15px;">Cook Next Order</button>
         <button class="btn-danger" onclick="undoAdmin()" style="margin-bottom: 15px; margin-left:10px;">↩ Undo Last (Stack)</button>
         <div id="adminQueueList"></div>
+
+        <h2 style="margin-top: 40px;">📊 Popular Items (Order Counter)</h2>
+        <button class="btn-green" onclick="loadPopularItems()" style="margin-bottom: 15px;">Refresh Stats</button>
+        <div id="popularItemsList"></div>
     </div>
 
     <div id="user" class="view active">
@@ -91,7 +95,7 @@
             refreshAll();
         }
 
-        function refreshAll() { loadMenu(); loadCart(); loadAdminQueue(); loadDriver(); }
+        function refreshAll() { loadMenu(); loadCart(); loadAdminQueue(); loadPopularItems(); loadDriver(); }
 
         // --- ADMIN ---
         async function addNewFood() {
@@ -108,6 +112,21 @@
         }
         async function processAdmin() { await fetch('/api/admin/process'); loadAdminQueue(); }
         async function undoAdmin() { await fetch('/api/admin/undo'); loadAdminQueue(); }
+
+        async function loadPopularItems() {
+            const res = await fetch('/api/analytics/popular?limit=10');
+            const data = await res.json();
+            let html = "<div class='grid'>";
+            if(data.length === 0) {
+                html += "<div class='card'><p style='color:#94a3b8;'>No items ordered yet.</p></div>";
+            } else {
+                data.forEach(item => {
+                    html += `<div class="card" style="margin-bottom:0;"><h4>${item.item}</h4><p style="color:#10b981; margin:0;">Ordered ${item.count} time${item.count !== 1 ? 's' : ''}</p></div>`;
+                });
+            }
+            html += "</div>";
+            document.getElementById('popularItemsList').innerHTML = html;
+        }
 
         // --- USER ---
         async function loadMenu() {
