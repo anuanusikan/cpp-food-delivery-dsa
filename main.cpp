@@ -252,6 +252,27 @@ int main() {
         res.set_content(getRoute(req.get_param_value("dest")), "application/json");
     });
 
+    // --- ANALYTICS APIs ---
+    svr.Get("/api/analytics/popular", [&](const httplib::Request& req, httplib::Response& res) {
+        int limit = req.has_param("limit") ? stoi(req.get_param_value("limit")) : 5;
+
+        vector<pair<string, int>> sorted(itemOrderCount.begin(), itemOrderCount.end());
+        sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) {
+            return a.second > b.second;
+        });
+
+        string json = "[";
+        bool first = true;
+        for(int i = 0; i < min(limit, (int)sorted.size()); i++) {
+            if(!first) json += ",";
+            json += "{\"item\":\"" + sorted[i].first + "\",\"count\":" + to_string(sorted[i].second) + "}";
+            first = false;
+        }
+        json += "]";
+
+        res.set_content(json, "application/json");
+    });
+
     cout << "\n=======================================\n";
     cout << "MASTER SYSTEM ONLINE\n";
     cout << "Open Browser at: http://localhost:8080\n";
