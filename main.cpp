@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <sstream>
 
 using namespace std;
 
@@ -57,7 +58,10 @@ int orderID = 1000;
 // 6. Queue (Driver)
 queue<Order> driverQueue;
 
-// 7. Dynamic Graph (Routing)
+// 7. Item Frequency Counter (Analytics)
+unordered_map<string, int> itemOrderCount;
+
+// 8. Dynamic Graph (Routing)
 unordered_map<string, vector<pair<string, int>>> cityGraph;
 
 void initializeCityMap() {
@@ -73,6 +77,19 @@ void addNewAddressToGraph(string newAddress) {
     cityGraph[newAddress].push_back({"Main_Road", randomDistance});
     cityGraph["Main_Road"].push_back({newAddress, randomDistance});
     cout << "[GRAPH] Added Node: " << newAddress << " (Distance to Main Road: " << randomDistance << "km)\n";
+}
+
+void incrementItemCounters(const string& allItems) {
+    stringstream ss(allItems);
+    string item;
+    while(getline(ss, item, ',')) {
+        item.erase(0, item.find_first_not_of(" "));
+        item.erase(item.find_last_not_of(" ") + 1);
+        if(!item.empty()) {
+            itemOrderCount[item]++;
+            cout << "[COUNTER] " << item << " count: " << itemOrderCount[item] << endl;
+        }
+    }
 }
 
 string getRoute(string endNode) {
@@ -209,8 +226,12 @@ int main() {
 
         string allItems = ""; CartNode* curr = cartHead;
         while(curr) { allItems += curr->item + ", "; CartNode* temp=curr; curr=curr->next; delete temp; }
-        cartHead = cartTail = nullptr; 
-        
+
+        incrementItemCounters(allItems);  // Track item popularity
+        cout << "[CHECKOUT] Updated item frequencies. Total unique items tracked: " << itemOrderCount.size() << endl;
+
+        cartHead = cartTail = nullptr;
+
         adminQueue.push({orderID++, allItems, address, vip}); // Pass address to order
         res.set_content("{\"status\":\"success\"}", "application/json");
     });
@@ -229,6 +250,27 @@ int main() {
 
     svr.Get("/api/route", [&](const httplib::Request& req, httplib::Response& res) {
         res.set_content(getRoute(req.get_param_value("dest")), "application/json");
+    });
+
+    // --- ANALYTICS APIs ---
+    svr.Get("/api/analytics/popular", [&](const httplib::Request& req, httplib::Response& res) {
+        int limit = req.has_param("limit") ? stoi(req.get_param_value("limit")) : 5;
+
+        vector<pair<string, int>> sorted(itemOrderCount.begin(), itemOrderCount.end());
+        sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) {
+            return a.second > b.second;
+        });
+
+        string json = "[";
+        bool first = true;
+        for(int i = 0; i < min(limit, (int)sorted.size()); i++) {
+            if(!first) json += ",";
+            json += "{\"item\":\"" + sorted[i].first + "\",\"count\":" + to_string(sorted[i].second) + "}";
+            first = false;
+        }
+        json += "]";
+
+        res.set_content(json, "application/json");
     });
 
     cout << "\n=======================================\n";
