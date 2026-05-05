@@ -2,91 +2,551 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enterprise Delivery System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Food Delivery - DSA Showcase</title>
     <style>
-        :root { --bg: #0f172a; --panel: #1e293b; --accent: #3b82f6; --text: #f8fafc; --vip: #f59e0b; }
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); }
-        .navbar { display: flex; background: #020617; padding: 0 20px; border-bottom: 1px solid #334155; }
-        .nav-btn { background: none; border: none; color: #94a3b8; padding: 20px; font-size: 16px; cursor: pointer; transition:0.2s;}
-        .nav-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); font-weight: bold; }
-        .view { display: none; padding: 40px; max-width: 1000px; margin: 0 auto; }
-        .view.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        :root { 
+            --bg: #0f172a; 
+            --panel: #1e293b; 
+            --accent: #3b82f6; 
+            --text: #f8fafc;
+            --success: #10b981;
+            --vip: #f59e0b; 
+            --warning: #ef4444;
+        }
         
-        .card { background: var(--panel); padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);}
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;}
-        .category-header { border-bottom: 2px solid #334155; padding-bottom: 5px; color: #94a3b8; margin-top: 20px;}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            background: var(--bg); 
+            color: var(--text);
+            min-height: 100vh;
+        }
         
-        input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box;}
-        button { background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;}
-        button:hover { filter: brightness(1.2); }
-        .btn-green { background: #10b981; } .btn-vip { background: var(--vip); } .btn-danger { background: #ef4444; }
-        .admin-form { display: flex; gap: 10px; }
+        .navbar { 
+            display: flex; 
+            background: #020617; 
+            padding: 0 20px; 
+            border-bottom: 2px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-btn { 
+            background: none; 
+            border: none; 
+            color: #94a3b8; 
+            padding: 20px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .nav-btn:hover { 
+            color: var(--accent); 
+        }
+        
+        .nav-btn.active { 
+            color: var(--accent); 
+            border-bottom: 3px solid var(--accent);
+            font-weight: bold;
+        }
+        
+        .view { 
+            display: none; 
+            padding: 40px 20px;
+            max-width: 1200px; 
+            margin: 0 auto;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .view.active { 
+            display: block; 
+        }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        h2 { 
+            margin-bottom: 20px; 
+            font-size: 28px; 
+            color: var(--accent); 
+        }
+        
+        h3 { 
+            margin: 20px 0 15px 0;
+            font-size: 20px;
+            color: #cbd5e1;
+        }
+        
+        .card { 
+            background: var(--panel); 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        
+        .card.vip-order {
+            border-left-color: var(--vip);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(30, 41, 59, 1));
+        }
+        
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 15px; 
+            margin-bottom: 30px;
+        }
+        
+        .grid-item {
+            background: var(--panel);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .grid-item:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .category-header { 
+            border-bottom: 2px solid #334155; 
+            padding-bottom: 10px; 
+            color: #94a3b8; 
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        input, select, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            background: #0f172a; 
+            border: 1px solid #334155; 
+            color: white; 
+            border-radius: 6px; 
+            margin-bottom: 10px; 
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        button { 
+            background: var(--accent); 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        button:hover { 
+            filter: brightness(1.15);
+            transform: translateY(-1px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .btn-success { background: var(--success); }
+        .btn-vip { background: var(--vip); color: #000; }
+        .btn-danger { background: var(--warning); }
+        .btn-secondary { background: #64748b; }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .admin-form { 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .form-section {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        
+        .form-section > div {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .form-section button {
+            margin-bottom: 0;
+        }
+        
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid var(--accent);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+        
+        .stats-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            background: linear-gradient(135deg, #334155, #1e293b);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #475569;
+        }
+        
+        .stat-label {
+            color: #94a3b8;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            color: var(--accent);
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .menu-item {
+            background: var(--panel);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .item-price {
+            color: var(--success);
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .item-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .item-buttons button {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid #334155;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .cart-total {
+            border-top: 2px solid #334155;
+            padding-top: 15px;
+            margin-top: 15px;
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--success);
+        }
+        
+        .route-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--success);
+            margin: 15px 0;
+            line-height: 1.8;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: var(--vip); }
+        .status-success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .status-error { background: rgba(239, 68, 68, 0.2); color: var(--warning); }
+        
+        .layout-container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .layout-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .navbar {
+                flex-wrap: wrap;
+            }
+            
+            .nav-btn {
+                padding: 15px;
+                font-size: 14px;
+            }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        .empty-state p {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        hr { 
+            border: none;
+            border-top: 1px solid #334155;
+            margin: 30px 0;
+        }
     </style>
 </head>
 <body>
 
+    <!-- NAVIGATION -->
     <div class="navbar">
-        <button class="nav-btn" onclick="switchView('admin')">1. Admin: Manage</button>
-        <button class="nav-btn active" onclick="switchView('user')">2. User: Order</button>
-        <button class="nav-btn" onclick="switchView('driver')">3. Driver: Deliver</button>
+        <button class="nav-btn" onclick="switchView('admin')">🛠️ Admin</button>
+        <button class="nav-btn active" onclick="switchView('user')">🛒 User</button>
+        <button class="nav-btn" onclick="switchView('driver')">🚗 Driver</button>
     </div>
 
+    <!-- ==========================================
+         ADMIN VIEW
+         ========================================== -->
     <div id="admin" class="view">
-        <h2>🛠️ Add New Food (Hash Map + Trie)</h2>
+        <h2>🛠️ Admin Dashboard - Kitchen Management</h2>
+        
+        <div class="info-box">
+            <strong>📊 Data Structures Used:</strong> Hash Map (Menu), Priority Queue (Kitchen Orders), Stack (Undo History)
+        </div>
+
+        <!-- Add Food Section -->
         <div class="card">
+            <h3>Add New Food to Menu</h3>
+            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">Hash Map: O(1) insertion | Trie: O(m) where m = word length</p>
             <div class="admin-form">
-                <input type="number" id="newId" placeholder="ID (e.g., 201)">
-                <input type="text" id="newName" placeholder="Name">
-                <input type="number" id="newPrice" placeholder="Price">
+                <input type="number" id="newId" placeholder="ID (e.g., 7)">
+                <input type="text" id="newName" placeholder="Food Name">
+                <input type="number" id="newPrice" placeholder="Price (Rs.)">
                 <input type="text" id="newCat" placeholder="Category">
             </div>
-            <button class="btn-green" style="width:100%" onclick="addNewFood()">+ Add to Menu</button>
+            <button class="btn-success" style="width:100%" onclick="addNewFood()">➕ Add to Menu</button>
         </div>
 
-        <h2 style="margin-top: 40px;">🍳 Kitchen Queue (Priority Queue)</h2>
-        <button class="btn-green" onclick="processAdmin()" style="margin-bottom: 15px;">Cook Next Order</button>
-        <button class="btn-danger" onclick="undoAdmin()" style="margin-bottom: 15px; margin-left:10px;">↩ Undo Last (Stack)</button>
-        <div id="adminQueueList"></div>
+        <!-- Kitchen Queue Section -->
+        <div class="card">
+            <h3>🍳 Kitchen Queue (Priority Queue)</h3>
+            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">O(log n) insertion/extraction | VIP orders prioritized</p>
+            <div class="btn-group">
+                <button class="btn-success" onclick="processAdmin()">👨‍🍳 Cook Next Order</button>
+                <button class="btn-secondary" onclick="undoAdmin()">↩️ Undo (Stack)</button>
+                <button class="btn-secondary" onclick="loadAdminQueue()">🔄 Refresh</button>
+            </div>
+            <div id="adminQueueList" style="margin-top: 15px;"></div>
+        </div>
 
-        <h2 style="margin-top: 40px;">📊 Popular Items (Order Counter)</h2>
-        <button class="btn-green" onclick="loadPopularItems()" style="margin-bottom: 15px;">Refresh Stats</button>
-        <div id="popularItemsList"></div>
+        <!-- Popular Items Section -->
+        <div class="card">
+            <h3>📊 Popular Items Analytics</h3>
+            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">Hash Map Counter | O(n log n) sorting</p>
+            <button class="btn-success" onclick="loadPopularItems()">📈 Load Statistics</button>
+            <div id="popularItemsList" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- System Stats -->
+        <div class="card">
+            <h3>📐 System Statistics</h3>
+            <div id="sysStats"></div>
+        </div>
     </div>
 
+    <!-- ==========================================
+         USER VIEW
+         ========================================== -->
     <div id="user" class="view active">
-        <h2>Menu</h2>
-        <input type="text" id="searchBar" placeholder="Search menu... (Trie Algorithm)" onkeyup="loadMenu()">
+        <h2>🛒 Order Your Meal</h2>
         
-        <div style="display: flex; gap: 40px;">
-            <div id="menuContainer" style="flex: 2;"></div> 
-            
-            <div class="card" style="flex: 1; height: fit-content;">
-                <h3>🛒 Cart (Linked List)</h3>
-                <div id="cartList" style="margin-bottom: 20px;">Cart is empty.</div>
+        <div class="info-box">
+            <strong>📊 Data Structures Used:</strong> Hash Map (Menu Categories), Trie (Search), Doubly Linked List (Cart)
+        </div>
+
+        <div class="layout-container">
+            <!-- Menu Section -->
+            <div>
+                <h3>Browse Menu</h3>
+                <input type="text" id="searchBar" placeholder="🔍 Search by name (Trie Algorithm)..." onkeyup="loadMenu()">
+                <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Trie: O(m) search | Hash Map: O(1) lookup</p>
+                <div id="menuContainer"></div>
+            </div>
+
+            <!-- Cart Section -->
+            <div class="card" style="height: fit-content; position: sticky; top: 80px;">
+                <h3>🛒 Your Cart</h3>
+                <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Doubly Linked List: O(1) add/remove</p>
+                <div id="cartList" style="margin-bottom: 20px; min-height: 50px;">
+                    <div class="empty-state" style="padding: 20px; margin: 0;">
+                        <p>Cart is empty</p>
+                    </div>
+                </div>
                 
-                <input type="text" id="userDest" placeholder="Enter Custom Delivery Address" required>
+                <hr style="margin: 15px 0;">
                 
-                <button style="width: 100%; margin-bottom:10px;" onclick="checkout(false)">Standard Checkout</button>
-                <button class="btn-vip" style="width: 100%" onclick="checkout(true)">VIP Checkout (Priority)</button>
+                <h3 style="margin-top: 15px;">Delivery Details</h3>
+                <input type="text" id="userDest" placeholder="Enter delivery address" value="Restaurant">
+                
+                <button class="btn-success" style="width: 100%; margin-bottom:10px;" onclick="checkout(false)">
+                    🚚 Standard Checkout
+                </button>
+                <button class="btn-vip" style="width: 100%;" onclick="checkout(true)">
+                    👑 VIP Checkout (Priority)
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- ==========================================
+         DRIVER VIEW
+         ========================================== -->
     <div id="driver" class="view">
-        <h2>🚗 Delivery Queue (FIFO)</h2>
+        <h2>🚗 Driver Dashboard - Delivery Management</h2>
+        
+        <div class="info-box">
+            <strong>📊 Data Structures Used:</strong> Queue/FIFO (Delivery Queue), Weighted Graph + Dijkstra (Route Optimization)
+        </div>
+
         <div class="card">
-            <h3 id="d-id">No active deliveries.</h3>
-            <p id="d-items"></p>
-            <p style="color:#f59e0b; font-weight:bold;" id="d-addr"></p>
-            <div id="routeBox" style="margin: 20px 0; color: #10b981; font-family: monospace; font-size:16px;"></div>
+            <h3>Current Delivery Assignment</h3>
+            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">Queue: O(1) dequeue | Dijkstra: O((V+E)log V)</p>
             
-            <button onclick="getRoute()">📍 Map Route to Customer (Dijkstra)</button>
-            <button class="btn-green" onclick="completeDelivery()">✅ Confirm Delivered</button>
+            <div id="deliveryInfo" style="margin-bottom: 20px;">
+                <div class="empty-state" style="padding: 30px;">
+                    <p>No active deliveries</p>
+                    <button class="btn-secondary" onclick="loadDriver()" style="margin-top: 10px;">Check for Orders</button>
+                </div>
+            </div>
+
+            <div id="deliveryCard" style="display: none;">
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">Order ID</p>
+                        <p id="d-id" style="font-size: 20px; font-weight: bold; color: var(--accent);"></p>
+                    </div>
+                    <div>
+                        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">Status</p>
+                        <span class="status-badge status-pending">IN DELIVERY</span>
+                    </div>
+                </div>
+
+                <p style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">Items</p>
+                <p id="d-items" style="background: rgba(59, 130, 246, 0.05); padding: 10px; border-radius: 6px; margin-bottom: 15px; border-left: 3px solid var(--accent);"></p>
+
+                <p style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">📍 Delivery Address</p>
+                <p id="d-addr" style="font-size: 18px; color: var(--vip); font-weight: bold; margin-bottom: 20px;"></p>
+
+                <div class="btn-group" style="margin-bottom: 20px;">
+                    <button class="btn-success" onclick="getRoute()">📍 Calculate Route (Dijkstra)</button>
+                    <button class="btn-secondary" onclick="refreshDriver()">🔄 Refresh</button>
+                </div>
+
+                <div id="routeBox" style="display: none;"></div>
+
+                <button class="btn-success" style="width: 100%; padding: 15px;" onclick="completeDelivery()">
+                    ✅ Confirm Delivered
+                </button>
+            </div>
+        </div>
+
+        <!-- Delivery Queue Stats -->
+        <div class="card">
+            <h3>Queue Status</h3>
+            <div class="stats-box">
+                <div class="stat-item">
+                    <div class="stat-label">Pending Deliveries</div>
+                    <div class="stat-value" id="pendingCount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Orders Processed</div>
+                    <div class="stat-value" id="processedCount">0</div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- JAVASCRIPT -->
     <script>
+        let processedOrders = 0;
+
         function switchView(id) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -95,95 +555,331 @@
             refreshAll();
         }
 
-        function refreshAll() { loadMenu(); loadCart(); loadAdminQueue(); loadPopularItems(); loadDriver(); }
+        function refreshAll() {
+            loadMenu();
+            loadCart();
+            loadAdminQueue();
+            loadPopularItems();
+            loadDriver();
+            loadSystemStats();
+        }
 
-        // --- ADMIN ---
+        // ==========================================
+        // ADMIN FUNCTIONS
+        // ==========================================
+
         async function addNewFood() {
-            let id = document.getElementById('newId').value, name = document.getElementById('newName').value, price = document.getElementById('newPrice').value, cat = document.getElementById('newCat').value;
-            if(!id || !name || !price || !cat) return alert("Fill all fields!");
-            await fetch(`/api/menu/add?id=${id}&name=${name}&price=${price}&category=${cat}`);
-            document.getElementById('newId').value = ""; document.getElementById('newName').value = "";
-            switchView('user'); 
+            let id = document.getElementById('newId').value;
+            let name = document.getElementById('newName').value;
+            let price = document.getElementById('newPrice').value;
+            let cat = document.getElementById('newCat').value;
+
+            if (!id || !name || !price || !cat) {
+                alert("❌ Please fill all fields!");
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/menu/add?id=${id}&name=${name}&price=${price}&category=${cat}`);
+                const data = await res.json();
+                
+                if (data.status === "success") {
+                    alert("✅ Food item added successfully!");
+                    document.getElementById('newId').value = "";
+                    document.getElementById('newName').value = "";
+                    document.getElementById('newPrice').value = "";
+                    document.getElementById('newCat').value = "";
+                    loadMenu();
+                }
+            } catch (e) {
+                alert("❌ Error adding food item");
+            }
         }
 
         async function loadAdminQueue() {
-            const res = await fetch('/api/admin/queue'); const data = await res.json();
-            document.getElementById('adminQueueList').innerHTML = data.map(o => `<div class="card" style="border-left: 4px solid ${o.vip?'#f59e0b':'#3b82f6'}"><strong>Order #${o.id}</strong> ${o.vip?'<span style="color:#f59e0b">(VIP)</span>':''}<br>${o.items}</div>`).join('');
+            try {
+                const res = await fetch('/api/admin/queue');
+                const data = await res.json();
+                
+                let html = "";
+                if (data.length === 0) {
+                    html = '<div class="empty-state" style="padding: 30px;"><p>No orders in queue</p></div>';
+                } else {
+                    data.forEach(o => {
+                        html += `<div class="card ${o.vip ? 'vip-order' : ''}">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <h4 style="margin: 0 0 8px 0;">Order #${o.id}</h4>
+                                    <p style="margin: 0; color: #cbd5e1; font-size: 14px;">${o.items}</p>
+                                </div>
+                                ${o.vip ? '<span class="status-badge btn-vip" style="height: fit-content;">👑 VIP</span>' : ''}
+                            </div>
+                        </div>`;
+                    });
+                }
+                document.getElementById('adminQueueList').innerHTML = html;
+            } catch (e) {
+                console.error("Error loading queue:", e);
+            }
         }
-        async function processAdmin() { await fetch('/api/admin/process'); loadAdminQueue(); }
-        async function undoAdmin() { await fetch('/api/admin/undo'); loadAdminQueue(); }
+
+        async function processAdmin() {
+            try {
+                await fetch('/api/admin/process');
+                processedOrders++;
+                loadAdminQueue();
+                loadDriver();
+                alert("✅ Order sent to kitchen!");
+            } catch (e) {
+                alert("❌ Error processing order");
+            }
+        }
+
+        async function undoAdmin() {
+            try {
+                await fetch('/api/admin/undo');
+                loadAdminQueue();
+                alert("✅ Last order restored!");
+            } catch (e) {
+                alert("❌ Error undoing operation");
+            }
+        }
 
         async function loadPopularItems() {
-            const res = await fetch('/api/analytics/popular?limit=10');
-            const data = await res.json();
-            let html = "<div class='grid'>";
-            if(data.length === 0) {
-                html += "<div class='card'><p style='color:#94a3b8;'>No items ordered yet.</p></div>";
-            } else {
-                data.forEach(item => {
-                    html += `<div class="card" style="margin-bottom:0;"><h4>${item.item}</h4><p style="color:#10b981; margin:0;">Ordered ${item.count} time${item.count !== 1 ? 's' : ''}</p></div>`;
-                });
+            try {
+                const res = await fetch('/api/analytics/popular?limit=10');
+                const data = await res.json();
+                
+                let html = "";
+                if (data.length === 0) {
+                    html = '<div class="empty-state"><p>No items ordered yet</p></div>';
+                } else {
+                    html = '<div class="grid">';
+                    data.forEach(item => {
+                        html += `<div class="grid-item">
+                            <h4 style="margin: 0 0 10px 0; color: var(--accent);">${item.item}</h4>
+                            <p style="margin: 0; color: var(--success); font-size: 18px; font-weight: bold;">
+                                ${item.count} order${item.count !== 1 ? 's' : ''}
+                            </p>
+                        </div>`;
+                    });
+                    html += '</div>';
+                }
+                document.getElementById('popularItemsList').innerHTML = html;
+            } catch (e) {
+                console.error("Error loading popular items:", e);
             }
-            html += "</div>";
-            document.getElementById('popularItemsList').innerHTML = html;
         }
 
-        // --- USER ---
+        async function loadSystemStats() {
+            try {
+                const res = await fetch('/api/analytics/stats');
+                const data = await res.json();
+                
+                const html = `
+                    <div class="stats-box">
+                        <div class="stat-item">
+                            <div class="stat-label">Kitchen Queue</div>
+                            <div class="stat-value">${data.queue_size}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Driver Queue</div>
+                            <div class="stat-value">${data.driver_queue_size}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Undo History</div>
+                            <div class="stat-value">${data.history_size}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Cart Items</div>
+                            <div class="stat-value">${data.cart_items}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Unique Items</div>
+                            <div class="stat-value">${data.unique_items_ordered}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Graph Nodes</div>
+                            <div class="stat-value">${data.graph_nodes}</div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('sysStats').innerHTML = html;
+            } catch (e) {
+                console.error("Error loading stats:", e);
+            }
+        }
+
+        // ==========================================
+        // USER FUNCTIONS
+        // ==========================================
+
         async function loadMenu() {
-            let q = document.getElementById('searchBar').value;
-            const res = await fetch(`/api/menu?q=${q}`); const categories = await res.json();
-            let html = "";
-            for (const [category, items] of Object.entries(categories)) {
-                html += `<h3 class="category-header">${category}</h3><div class="grid">`;
-                items.forEach(i => {
-                    html += `<div class="card" style="margin-bottom:0;"><small style="color:#94a3b8">ID: ${i.id}</small><h4 style="margin:5px 0;">${i.name}</h4><p style="color:#10b981; margin:0 0 10px 0;">Rs. ${i.price}</p><button onclick="addToCart('${i.name}', ${i.price})">Add to Cart</button></div>`;
-                });
-                html += `</div>`;
+            try {
+                let q = document.getElementById('searchBar').value;
+                const res = await fetch(`/api/menu?q=${q}`);
+                const categories = await res.json();
+                
+                let html = "";
+                let hasItems = false;
+
+                for (const [category, items] of Object.entries(categories)) {
+                    if (items.length > 0) {
+                        hasItems = true;
+                        html += `<h3 class="category-header">${category}</h3>`;
+                        items.forEach(i => {
+                            html += `<div class="menu-item">
+                                <div class="item-info">
+                                    <div class="item-name">${i.name}</div>
+                                    <div class="item-price">Rs. ${i.price}</div>
+                                </div>
+                                <div class="item-buttons">
+                                    <button class="btn-success" onclick="addToCart('${i.name.replace(/'/g, "\\'")}', ${i.price})">Add</button>
+                                </div>
+                            </div>`;
+                        });
+                    }
+                }
+
+                if (!hasItems) {
+                    html = '<div class="empty-state"><p>No items found</p></div>';
+                }
+
+                document.getElementById('menuContainer').innerHTML = html;
+            } catch (e) {
+                console.error("Error loading menu:", e);
             }
-            document.getElementById('menuContainer').innerHTML = html || "No items found.";
         }
 
-        async function addToCart(item, price) { await fetch(`/api/cart/add?item=${item}&price=${price}`); loadCart(); }
+        async function addToCart(item, price) {
+            try {
+                await fetch(`/api/cart/add?item=${encodeURIComponent(item)}&price=${price}`);
+                loadCart();
+            } catch (e) {
+                alert("❌ Error adding to cart");
+            }
+        }
+
         async function loadCart() {
-            const res = await fetch('/api/cart/view'); const data = await res.json();
-            let html = ""; let total = 0;
-            data.forEach(i => { html += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${i.item}</span><span>Rs. ${i.price}</span></div>`; total += i.price; });
-            document.getElementById('cartList').innerHTML = html ? html + `<hr><h4 style="text-align:right; margin:0;">Total: Rs. ${total}</h4>` : "Cart is empty.";
-        }
-        
-        async function checkout(isVIP) { 
-            let address = document.getElementById('userDest').value;
-            if(!address) return alert("Please enter a custom delivery address!");
-            await fetch(`/api/checkout?vip=${isVIP}&address=${encodeURIComponent(address)}`); 
-            alert("Sent to Kitchen!"); loadCart(); 
-        }
+            try {
+                const res = await fetch('/api/cart/view');
+                const data = await res.json();
+                
+                let html = "";
+                let total = 0;
 
-        // --- DRIVER ---
-        let currentDriverAddress = "";
-        async function loadDriver() {
-            const res = await fetch('/api/driver/queue'); const data = await res.json();
-            if(data.id) {
-                document.getElementById('d-id').innerText = "Deliver Order #" + data.id;
-                document.getElementById('d-items').innerText = "Items: " + data.items;
-                document.getElementById('d-addr').innerText = "Destination: " + data.address;
-                currentDriverAddress = data.address;
-            } else { 
-                document.getElementById('d-id').innerText = "No active deliveries."; 
-                document.getElementById('d-items').innerText = ""; 
-                document.getElementById('d-addr').innerText = ""; 
-                document.getElementById('routeBox').innerHTML = ""; 
-                currentDriverAddress = "";
+                if (data.length === 0) {
+                    html = '<div class="empty-state" style="padding: 20px; margin: 0;"><p>Cart is empty</p></div>';
+                } else {
+                    data.forEach(i => {
+                        html += `<div class="cart-item">
+                            <span>${i.item}</span>
+                            <strong style="color: var(--success);">Rs. ${i.price}</strong>
+                        </div>`;
+                        total += i.price;
+                    });
+                    html += `<div class="cart-total">Total: Rs. ${total}</div>`;
+                }
+
+                document.getElementById('cartList').innerHTML = html;
+            } catch (e) {
+                console.error("Error loading cart:", e);
             }
         }
-        async function getRoute() {
-            if(!currentDriverAddress) return;
-            const res = await fetch(`/api/route?dest=${encodeURIComponent(currentDriverAddress)}`); const data = await res.json();
-            document.getElementById('routeBox').innerHTML = `Optimal Path:<br>🚀 ${data.path} 🏁<br>Total Distance: ${data.distance} km`;
-        }
-        async function completeDelivery() { await fetch('/api/driver/deliver'); loadDriver(); document.getElementById('routeBox').innerHTML = ""; }
 
+        async function checkout(isVIP) {
+            try {
+                let address = document.getElementById('userDest').value;
+                if (!address) {
+                    alert("❌ Please enter delivery address!");
+                    return;
+                }
+
+                const res = await fetch(`/api/checkout?vip=${isVIP}&address=${encodeURIComponent(address)}`);
+                const data = await res.json();
+
+                if (data.status === "success") {
+                    alert(`✅ Order #${data.order_id} placed! ${data.vip ? '👑 VIP Priority' : ''}`);
+                    loadCart();
+                    loadAdminQueue();
+                } else if (data.status === "empty_cart") {
+                    alert("❌ Cart is empty!");
+                }
+            } catch (e) {
+                alert("❌ Error during checkout");
+            }
+        }
+
+        // ==========================================
+        // DRIVER FUNCTIONS
+        // ==========================================
+
+        let currentDriverAddress = "";
+
+        async function loadDriver() {
+            try {
+                const res = await fetch('/api/driver/queue');
+                const data = await res.json();
+
+                if (data.id) {
+                    document.getElementById('deliveryInfo').style.display = 'none';
+                    document.getElementById('deliveryCard').style.display = 'block';
+                    document.getElementById('d-id').innerText = `Order #${data.id}`;
+                    document.getElementById('d-items').innerText = data.items;
+                    document.getElementById('d-addr').innerText = `📍 ${data.address}`;
+                    currentDriverAddress = data.address;
+                    document.getElementById('routeBox').style.display = 'none';
+                    document.getElementById('routeBox').innerHTML = '';
+                } else {
+                    document.getElementById('deliveryInfo').style.display = 'block';
+                    document.getElementById('deliveryCard').style.display = 'none';
+                }
+
+                document.getElementById('pendingCount').innerText = processedOrders;
+            } catch (e) {
+                console.error("Error loading driver queue:", e);
+            }
+        }
+
+        function refreshDriver() {
+            loadDriver();
+        }
+
+        async function getRoute() {
+            if (!currentDriverAddress) return;
+
+            try {
+                const res = await fetch(`/api/route?dest=${encodeURIComponent(currentDriverAddress)}`);
+                const data = await res.json();
+
+                const html = `
+                    <div class="route-info">
+                        <strong>🗺️ Optimal Route</strong><br>
+                        📍 ${data.path}<br><br>
+                        <strong>📏 Total Distance:</strong> ${data.distance} km
+                    </div>
+                `;
+                document.getElementById('routeBox').innerHTML = html;
+                document.getElementById('routeBox').style.display = 'block';
+            } catch (e) {
+                alert("❌ Error calculating route");
+            }
+        }
+
+        async function completeDelivery() {
+            try {
+                await fetch('/api/driver/deliver');
+                processedOrders++;
+                alert("✅ Delivery confirmed!");
+                loadDriver();
+            } catch (e) {
+                alert("❌ Error confirming delivery");
+            }
+        }
+
+        // Initialize
         refreshAll();
-        setInterval(refreshAll, 2000); 
+        setInterval(refreshAll, 3000);
     </script>
 </body>
 </html>
