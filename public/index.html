@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Food Delivery - DSA Showcase</title>
+    <title>Smart Food Delivery - DSA Showcase (Fixed)</title>
     <style>
         :root { 
             --bg: #0f172a; 
@@ -370,6 +370,16 @@
             border-top: 1px solid #334155;
             margin: 30px 0;
         }
+
+        .session-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: var(--success);
+        }
     </style>
 </head>
 <body>
@@ -388,7 +398,9 @@
         <h2>🛠️ Admin Dashboard - Kitchen Management</h2>
         
         <div class="info-box">
-            <strong>📊 Data Structures Used:</strong> Hash Map (Menu), Priority Queue (Kitchen Orders), Stack (Undo History)
+            <strong>✅ FIXED: Multi-User Support</strong> • Session-Based Cart
+            <br><strong>✅ FIXED: Multi-Driver Support</strong> • 3+ Drivers with Auto-Assignment
+            <br><strong>✅ FIXED: Order Status Tracking</strong> • PENDING→READY→DELIVERED
         </div>
 
         <!-- Add Food Section -->
@@ -407,7 +419,7 @@
         <!-- Kitchen Queue Section -->
         <div class="card">
             <h3>🍳 Kitchen Queue (Priority Queue)</h3>
-            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">O(log n) insertion/extraction | VIP orders prioritized</p>
+            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">O(log n) insertion/extraction | VIP orders prioritized | Status tracking enabled</p>
             <div class="btn-group">
                 <button class="btn-success" onclick="processAdmin()">👨‍🍳 Cook Next Order</button>
                 <button class="btn-secondary" onclick="undoAdmin()">↩️ Undo (Stack)</button>
@@ -438,14 +450,19 @@
         <h2>🛒 Order Your Meal</h2>
         
         <div class="info-box">
-            <strong>📊 Data Structures Used:</strong> Hash Map (Menu Categories), Trie (Search), Doubly Linked List (Cart)
+            <strong>✅ FIXED: Multi-User System</strong> • Each user has independent cart & session
+            <br><strong>Data Structures:</strong> Hash Map (Menu), Doubly Linked List (Cart), Trie (Search)
+        </div>
+
+        <div class="session-info" id="sessionInfo">
+            Session: Loading...
         </div>
 
         <div class="layout-container">
             <!-- Menu Section -->
             <div>
                 <h3>Browse Menu</h3>
-                <input type="text" id="searchBar" placeholder="🔍 Search by name (Trie Algorithm)..." onkeyup="loadMenu()">
+                <input type="text" id="searchBar" placeholder="🔍 Search by name..." onkeyup="loadMenu()">
                 <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Trie: O(m) search | Hash Map: O(1) lookup</p>
                 <div id="menuContainer"></div>
             </div>
@@ -479,19 +496,36 @@
          DRIVER VIEW
          ========================================== -->
     <div id="driver" class="view">
-        <h2>🚗 Driver Dashboard - Delivery Management</h2>
+        <h2>🚗 Driver Dashboard - Multi-Driver Delivery System</h2>
         
         <div class="info-box">
-            <strong>📊 Data Structures Used:</strong> Queue/FIFO (Delivery Queue), Weighted Graph + Dijkstra (Route Optimization)
+            <strong>✅ FIXED: Multi-Driver Support</strong> • Each driver has independent assignment
+            <br><strong>Data Structures:</strong> Driver Status Tracking, Queue (FIFO), Graph + Dijkstra
         </div>
 
+        <!-- Driver Login Section -->
         <div class="card">
-            <h3>Current Delivery Assignment</h3>
-            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">Queue: O(1) dequeue | Dijkstra: O((V+E)log V)</p>
+            <h3>🔐 Driver Login</h3>
+            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">Available drivers: 101, 102, 103</p>
+            <div class="form-section">
+                <div>
+                    <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 5px;">Driver ID</label>
+                    <input type="number" id="driverId" placeholder="Enter driver ID (101, 102, 103)" value="101" style="margin-bottom: 0;">
+                </div>
+                <button class="btn-success" onclick="driverLogin()" style="margin-bottom: 10px;">Login</button>
+                <button class="btn-secondary" onclick="logoutDriver()" style="margin-bottom: 10px;">Logout</button>
+            </div>
+            <div id="driverStatus" style="color: #94a3b8; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 6px;">❌ Not logged in</div>
+        </div>
+
+        <!-- Current Delivery Assignment -->
+        <div class="card">
+            <h3>📦 Current Delivery Assignment</h3>
+            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">Auto-assigned by system | Dijkstra: O((V+E)log V)</p>
             
             <div id="deliveryInfo" style="margin-bottom: 20px;">
                 <div class="empty-state" style="padding: 30px;">
-                    <p>No active deliveries</p>
+                    <p>No active deliveries - Please login first</p>
                     <button class="btn-secondary" onclick="loadDriver()" style="margin-top: 10px;">Check for Orders</button>
                 </div>
             </div>
@@ -504,7 +538,7 @@
                     </div>
                     <div>
                         <p style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">Status</p>
-                        <span class="status-badge status-pending">IN DELIVERY</span>
+                        <span class="status-badge status-pending" id="d-status">IN DELIVERY</span>
                     </div>
                 </div>
 
@@ -527,17 +561,36 @@
             </div>
         </div>
 
-        <!-- Delivery Queue Stats -->
+        <!-- Driver Performance Stats -->
         <div class="card">
-            <h3>Queue Status</h3>
+            <h3>📊 Your Performance</h3>
             <div class="stats-box">
                 <div class="stat-item">
-                    <div class="stat-label">Pending Deliveries</div>
-                    <div class="stat-value" id="pendingCount">0</div>
+                    <div class="stat-label">Completed Deliveries</div>
+                    <div class="stat-value" id="driverCompleted">0</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">Orders Processed</div>
-                    <div class="stat-value" id="processedCount">0</div>
+                    <div class="stat-label">Status</div>
+                    <div class="stat-value" id="driverCurrentStatus">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Wide Driver Stats -->
+        <div class="card">
+            <h3>🌐 System-Wide Driver Stats</h3>
+            <div class="stats-box">
+                <div class="stat-item">
+                    <div class="stat-label">Total Drivers</div>
+                    <div class="stat-value" id="totalDrivers">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Available Now</div>
+                    <div class="stat-value" id="availableDrivers">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Active Deliveries</div>
+                    <div class="stat-value" id="activeDeliveries">0</div>
                 </div>
             </div>
         </div>
@@ -545,8 +598,42 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        let processedOrders = 0;
+        // ==========================================
+        // SESSION MANAGEMENT - FIX #1
+        // ==========================================
+        let currentSessionId = null;
+        let currentDriverId = null;
+        let currentDeliveryAddress = "";
 
+        async function initializeSession() {
+            try {
+                const res = await fetch('/api/session/create');
+                const data = await res.json();
+                currentSessionId = data.sessionId;
+                console.log("✅ Session created:", currentSessionId);
+                localStorage.setItem('sessionId', currentSessionId);
+                document.getElementById('sessionInfo').innerHTML = 
+                    `✅ Session ID: ${currentSessionId.substring(0, 30)}...`;
+            } catch (e) {
+                console.error("Failed to create session:", e);
+                document.getElementById('sessionInfo').innerHTML = 
+                    `❌ Session creation failed`;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            currentSessionId = localStorage.getItem('sessionId');
+            if (!currentSessionId) {
+                initializeSession();
+            } else {
+                document.getElementById('sessionInfo').innerHTML = 
+                    `✅ Session ID: ${currentSessionId.substring(0, 30)}...`;
+            }
+        });
+
+        // ==========================================
+        // VIEW SWITCHING
+        // ==========================================
         function switchView(id) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -610,7 +697,8 @@
                             <div style="display: flex; justify-content: space-between; align-items: start;">
                                 <div>
                                     <h4 style="margin: 0 0 8px 0;">Order #${o.id}</h4>
-                                    <p style="margin: 0; color: #cbd5e1; font-size: 14px;">${o.items}</p>
+                                    <p style="margin: 0 0 8px 0; color: #cbd5e1; font-size: 14px;">${o.items}</p>
+                                    <span class="status-badge status-pending">${o.status}</span>
                                 </div>
                                 ${o.vip ? '<span class="status-badge btn-vip" style="height: fit-content;">👑 VIP</span>' : ''}
                             </div>
@@ -625,11 +713,15 @@
 
         async function processAdmin() {
             try {
-                await fetch('/api/admin/process');
-                processedOrders++;
-                loadAdminQueue();
-                loadDriver();
-                alert("✅ Order sent to kitchen!");
+                const res = await fetch('/api/admin/process');
+                const data = await res.json();
+                if (data.status === "success") {
+                    loadAdminQueue();
+                    loadDriver();
+                    alert("✅ Order sent to kitchen!");
+                } else {
+                    alert("❌ Queue is empty");
+                }
             } catch (e) {
                 alert("❌ Error processing order");
             }
@@ -637,9 +729,12 @@
 
         async function undoAdmin() {
             try {
-                await fetch('/api/admin/undo');
-                loadAdminQueue();
-                alert("✅ Last order restored!");
+                const res = await fetch('/api/admin/undo');
+                const data = await res.json();
+                if (data.status === "success") {
+                    loadAdminQueue();
+                    alert("✅ Last order restored!");
+                }
             } catch (e) {
                 alert("❌ Error undoing operation");
             }
@@ -683,35 +778,41 @@
                             <div class="stat-value">${data.queue_size}</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-label">Driver Queue</div>
-                            <div class="stat-value">${data.driver_queue_size}</div>
+                            <div class="stat-label">Active Sessions</div>
+                            <div class="stat-value">${data.active_sessions}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Total Drivers</div>
+                            <div class="stat-value">${data.total_drivers}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Available Drivers</div>
+                            <div class="stat-value" style="color: var(--success);">${data.available_drivers}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-label">Undo History</div>
                             <div class="stat-value">${data.history_size}</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-label">Cart Items</div>
-                            <div class="stat-value">${data.cart_items}</div>
-                        </div>
-                        <div class="stat-item">
                             <div class="stat-label">Unique Items</div>
                             <div class="stat-value">${data.unique_items_ordered}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Graph Nodes</div>
-                            <div class="stat-value">${data.graph_nodes}</div>
                         </div>
                     </div>
                 `;
                 document.getElementById('sysStats').innerHTML = html;
+                
+                // Update driver dashboard stats
+                document.getElementById('totalDrivers').innerText = data.total_drivers;
+                document.getElementById('availableDrivers').innerText = data.available_drivers;
+                document.getElementById('activeDeliveries').innerText = 
+                    data.total_drivers - data.available_drivers;
             } catch (e) {
                 console.error("Error loading stats:", e);
             }
         }
 
         // ==========================================
-        // USER FUNCTIONS
+        // USER FUNCTIONS - SESSION BASED
         // ==========================================
 
         async function loadMenu() {
@@ -752,17 +853,28 @@
         }
 
         async function addToCart(item, price) {
+            if (!currentSessionId) {
+                alert("❌ Session not initialized");
+                return;
+            }
             try {
-                await fetch(`/api/cart/add?item=${encodeURIComponent(item)}&price=${price}`);
-                loadCart();
+                const res = await fetch(`/api/cart/add?sessionId=${currentSessionId}&item=${encodeURIComponent(item)}&price=${price}`);
+                const data = await res.json();
+                if (data.status === "added") {
+                    loadCart();
+                } else {
+                    alert("❌ Error adding to cart");
+                }
             } catch (e) {
                 alert("❌ Error adding to cart");
             }
         }
 
         async function loadCart() {
+            if (!currentSessionId) return;
+            
             try {
-                const res = await fetch('/api/cart/view');
+                const res = await fetch(`/api/cart/view?sessionId=${currentSessionId}`);
                 const data = await res.json();
                 
                 let html = "";
@@ -788,6 +900,11 @@
         }
 
         async function checkout(isVIP) {
+            if (!currentSessionId) {
+                alert("❌ Session not initialized");
+                return;
+            }
+            
             try {
                 let address = document.getElementById('userDest').value;
                 if (!address) {
@@ -795,7 +912,7 @@
                     return;
                 }
 
-                const res = await fetch(`/api/checkout?vip=${isVIP}&address=${encodeURIComponent(address)}`);
+                const res = await fetch(`/api/checkout?sessionId=${currentSessionId}&vip=${isVIP}&address=${encodeURIComponent(address)}`);
                 const data = await res.json();
 
                 if (data.status === "success") {
@@ -811,31 +928,68 @@
         }
 
         // ==========================================
-        // DRIVER FUNCTIONS
+        // DRIVER FUNCTIONS - MULTI-DRIVER
         // ==========================================
 
-        let currentDriverAddress = "";
+        async function driverLogin() {
+            const driverId = document.getElementById('driverId').value;
+            
+            if (!driverId) {
+                alert("❌ Please enter driver ID");
+                return;
+            }
+            
+            try {
+                const res = await fetch(`/api/driver/login?driverId=${driverId}`);
+                const data = await res.json();
+                
+                if (data.status === "success") {
+                    currentDriverId = driverId;
+                    document.getElementById('driverStatus').innerHTML = 
+                        `✅ Logged in as ${data.name} (ID: ${driverId})`;
+                    loadDriver();
+                } else {
+                    alert("❌ Driver not found");
+                }
+            } catch (e) {
+                alert("❌ Login failed");
+            }
+        }
+
+        function logoutDriver() {
+            currentDriverId = null;
+            document.getElementById('driverStatus').innerHTML = "❌ Not logged in";
+            document.getElementById('deliveryInfo').style.display = 'block';
+            document.getElementById('deliveryCard').style.display = 'none';
+        }
 
         async function loadDriver() {
+            if (!currentDriverId) {
+                return;
+            }
+            
             try {
-                const res = await fetch('/api/driver/queue');
+                const res = await fetch(`/api/driver/next-assignment?driverId=${currentDriverId}`);
                 const data = await res.json();
 
                 if (data.id) {
                     document.getElementById('deliveryInfo').style.display = 'none';
                     document.getElementById('deliveryCard').style.display = 'block';
                     document.getElementById('d-id').innerText = `Order #${data.id}`;
-                    document.getElementById('d-items').innerText = data.items;
+                    document.getElementById('d-items').innerText = data.items || "Loading...";
                     document.getElementById('d-addr').innerText = `📍 ${data.address}`;
-                    currentDriverAddress = data.address;
+                    document.getElementById('d-status').innerText = data.status || "IN DELIVERY";
+                    currentDeliveryAddress = data.address;
                     document.getElementById('routeBox').style.display = 'none';
                     document.getElementById('routeBox').innerHTML = '';
+                    document.getElementById('driverCurrentStatus').innerText = 'ON DELIVERY';
                 } else {
                     document.getElementById('deliveryInfo').style.display = 'block';
                     document.getElementById('deliveryCard').style.display = 'none';
+                    document.getElementById('driverCurrentStatus').innerText = 'AVAILABLE';
                 }
-
-                document.getElementById('pendingCount').innerText = processedOrders;
+                
+                loadSystemStats();
             } catch (e) {
                 console.error("Error loading driver queue:", e);
             }
@@ -846,15 +1000,15 @@
         }
 
         async function getRoute() {
-            if (!currentDriverAddress) return;
+            if (!currentDeliveryAddress) return;
 
             try {
-                const res = await fetch(`/api/route?dest=${encodeURIComponent(currentDriverAddress)}`);
+                const res = await fetch(`/api/route?dest=${encodeURIComponent(currentDeliveryAddress)}`);
                 const data = await res.json();
 
                 const html = `
                     <div class="route-info">
-                        <strong>🗺️ Optimal Route</strong><br>
+                        <strong>🗺️ Optimal Route (Dijkstra Algorithm)</strong><br>
                         📍 ${data.path}<br><br>
                         <strong>📏 Total Distance:</strong> ${data.distance} km
                     </div>
@@ -867,11 +1021,16 @@
         }
 
         async function completeDelivery() {
+            if (!currentDriverId) return;
+            
             try {
-                await fetch('/api/driver/deliver');
-                processedOrders++;
-                alert("✅ Delivery confirmed!");
-                loadDriver();
+                const res = await fetch(`/api/driver/complete?driverId=${currentDriverId}`);
+                const data = await res.json();
+                
+                if (data.status === "success") {
+                    alert("✅ Delivery confirmed!");
+                    loadDriver();
+                }
             } catch (e) {
                 alert("❌ Error confirming delivery");
             }
@@ -879,7 +1038,7 @@
 
         // Initialize
         refreshAll();
-        setInterval(refreshAll, 3000);
+        setInterval(refreshAll, 2000);
     </script>
 </body>
 </html>
