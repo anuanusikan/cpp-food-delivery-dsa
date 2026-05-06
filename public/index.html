@@ -1,1044 +1,750 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Food Delivery - DSA Showcase (Fixed)</title>
+    <title>Smart Food Delivery</title>
     <style>
-        :root { 
-            --bg: #0f172a; 
-            --panel: #1e293b; 
-            --accent: #3b82f6; 
-            --text: #f8fafc;
-            --success: #10b981;
-            --vip: #f59e0b; 
-            --warning: #ef4444;
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
         }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, sans-serif; 
-            background: var(--bg); 
-            color: var(--text);
-            min-height: 100vh;
-        }
-        
-        .navbar { 
-            display: flex; 
-            background: #020617; 
-            padding: 0 20px; 
-            border-bottom: 2px solid #334155;
+
+        .navbar {
+            background: #020617;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 10;
         }
-        
-        .nav-btn { 
-            background: none; 
-            border: none; 
-            color: #94a3b8; 
-            padding: 20px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        
-        .nav-btn:hover { 
-            color: var(--accent); 
-        }
-        
-        .nav-btn.active { 
-            color: var(--accent); 
-            border-bottom: 3px solid var(--accent);
-            font-weight: bold;
-        }
-        
-        .view { 
-            display: none; 
-            padding: 40px 20px;
-            max-width: 1200px; 
-            margin: 0 auto;
-            animation: fadeIn 0.3s ease-in;
-        }
-        
-        .view.active { 
-            display: block; 
-        }
-        
-        @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(10px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
-        
-        h2 { 
-            margin-bottom: 20px; 
-            font-size: 28px; 
-            color: var(--accent); 
-        }
-        
-        h3 { 
-            margin: 20px 0 15px 0;
-            font-size: 20px;
-            color: #cbd5e1;
-        }
-        
-        .card { 
-            background: var(--panel); 
-            padding: 20px; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            border-left: 4px solid var(--accent);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
-        }
-        
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-        }
-        
-        .card.vip-order {
-            border-left-color: var(--vip);
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(30, 41, 59, 1));
-        }
-        
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-            gap: 15px; 
-            margin-bottom: 30px;
-        }
-        
-        .grid-item {
-            background: var(--panel);
-            padding: 15px;
-            border-radius: 8px;
+
+        .navbar button {
+            background: #1e293b;
+            color: white;
             border: 1px solid #334155;
+            padding: 12px 18px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s;
         }
-        
-        .grid-item:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
+
+        .navbar button:hover {
+            background: #3b82f6;
         }
-        
-        .category-header { 
-            border-bottom: 2px solid #334155; 
-            padding-bottom: 10px; 
-            color: #94a3b8; 
-            margin-top: 30px;
-            margin-bottom: 15px;
-            font-size: 18px;
-            font-weight: 600;
+
+        .view {
+            display: none;
+            padding: 25px;
         }
-        
-        input, select, textarea { 
-            width: 100%; 
-            padding: 12px; 
-            background: #0f172a; 
-            border: 1px solid #334155; 
-            color: white; 
-            border-radius: 6px; 
-            margin-bottom: 10px; 
-            font-size: 14px;
-            font-family: inherit;
+
+        .view.active {
+            display: block;
         }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        button { 
-            background: var(--accent); 
-            color: white; 
-            border: none; 
-            padding: 12px 20px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        
-        button:hover { 
-            filter: brightness(1.15);
-            transform: translateY(-1px);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        .btn-success { background: var(--success); }
-        .btn-vip { background: var(--vip); color: #000; }
-        .btn-danger { background: var(--warning); }
-        .btn-secondary { background: #64748b; }
-        
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .admin-form { 
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .form-section {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: flex-end;
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
             margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
         }
-        
-        .form-section > div {
-            flex: 1;
-            min-width: 150px;
-        }
-        
-        .form-section button {
-            margin-bottom: 0;
-        }
-        
-        .info-box {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid var(--accent);
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            color: #cbd5e1;
-            font-size: 14px;
-        }
-        
-        .stats-box {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-item {
-            background: linear-gradient(135deg, #334155, #1e293b);
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #475569;
-        }
-        
-        .stat-label {
-            color: #94a3b8;
-            font-size: 12px;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-        
-        .stat-value {
-            color: var(--accent);
-            font-size: 24px;
-            font-weight: bold;
-        }
-        
-        .menu-item {
-            background: var(--panel);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .item-info {
-            flex: 1;
-        }
-        
-        .item-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .item-price {
-            color: var(--success);
-            font-size: 16px;
-            font-weight: bold;
-        }
-        
-        .item-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .item-buttons button {
-            padding: 8px 12px;
-            font-size: 12px;
-        }
-        
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+
+        input {
             padding: 12px;
-            background: rgba(59, 130, 246, 0.05);
+            margin: 5px;
+            border-radius: 6px;
             border: 1px solid #334155;
+            background: #020617;
+            color: white;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
             border-radius: 6px;
-            margin-bottom: 8px;
-        }
-        
-        .cart-total {
-            border-top: 2px solid #334155;
-            padding-top: 15px;
-            margin-top: 15px;
-            text-align: right;
-            font-size: 18px;
+            background: #3b82f6;
+            color: white;
+            cursor: pointer;
             font-weight: bold;
-            color: var(--success);
         }
-        
-        .route-info {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid var(--success);
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: black;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+            color: black;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .item {
+            background: #0f172a;
             padding: 15px;
-            border-radius: 6px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            color: var(--success);
-            margin: 15px 0;
-            line-height: 1.8;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
         }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .status-pending { background: rgba(245, 158, 11, 0.2); color: var(--vip); }
-        .status-success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-        .status-error { background: rgba(239, 68, 68, 0.2); color: var(--warning); }
-        
-        .layout-container {
+
+        .grid {
             display: grid;
             grid-template-columns: 1fr 350px;
-            gap: 30px;
+            gap: 20px;
         }
-        
-        @media (max-width: 768px) {
-            .layout-container {
+
+        @media(max-width: 800px) {
+            .grid {
                 grid-template-columns: 1fr;
             }
-            
-            .grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-            
+
             .navbar {
                 flex-wrap: wrap;
             }
-            
-            .nav-btn {
-                padding: 15px;
-                font-size: 14px;
-            }
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #64748b;
-        }
-        
-        .empty-state p {
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        
-        hr { 
-            border: none;
-            border-top: 1px solid #334155;
-            margin: 30px 0;
         }
 
-        .session-info {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid var(--success);
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #334155;
+            color: #f59e0b;
             font-size: 12px;
-            color: var(--success);
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .route {
+            background: #052e16;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-family: monospace;
+            line-height: 1.7;
+        }
+
+        .info {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .role-title {
+            color: #38bdf8;
         }
     </style>
 </head>
 <body>
 
-    <!-- NAVIGATION -->
-    <div class="navbar">
-        <button class="nav-btn" onclick="switchView('admin')">🛠️ Admin</button>
-        <button class="nav-btn active" onclick="switchView('user')">🛒 User</button>
-        <button class="nav-btn" onclick="switchView('driver')">🚗 Driver</button>
+<!-- NAVIGATION -->
+<div class="navbar">
+    <button id="userNav" onclick="switchView('user')">User Dashboard</button>
+    <button id="adminNav" onclick="switchView('admin')">Admin Dashboard</button>
+    <button id="driverNav" onclick="switchView('driver')">Driver Dashboard</button>
+    <button class="btn-danger" onclick="logout()">Logout</button>
+</div>
+
+<!-- USER DASHBOARD -->
+<div id="user" class="view">
+    <h2 class="role-title">User Dashboard - Smart Food Restaurant</h2>
+
+    <div class="card">
+        <p id="sessionInfo">Checking login...</p>
+        <p class="info">
+            DSA used: Hash Map for authentication, Doubly Linked List for cart, Trie/search support for menu.
+        </p>
     </div>
 
-    <!-- ==========================================
-         ADMIN VIEW
-         ========================================== -->
-    <div id="admin" class="view">
-        <h2>🛠️ Admin Dashboard - Kitchen Management</h2>
-        
-        <div class="info-box">
-            <strong>✅ FIXED: Multi-User Support</strong> • Session-Based Cart
-            <br><strong>✅ FIXED: Multi-Driver Support</strong> • 3+ Drivers with Auto-Assignment
-            <br><strong>✅ FIXED: Order Status Tracking</strong> • PENDING→READY→DELIVERED
-        </div>
-
-        <!-- Add Food Section -->
-        <div class="card">
-            <h3>Add New Food to Menu</h3>
-            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">Hash Map: O(1) insertion | Trie: O(m) where m = word length</p>
-            <div class="admin-form">
-                <input type="number" id="newId" placeholder="ID (e.g., 7)">
-                <input type="text" id="newName" placeholder="Food Name">
-                <input type="number" id="newPrice" placeholder="Price (Rs.)">
-                <input type="text" id="newCat" placeholder="Category">
-            </div>
-            <button class="btn-success" style="width:100%" onclick="addNewFood()">➕ Add to Menu</button>
-        </div>
-
-        <!-- Kitchen Queue Section -->
-        <div class="card">
-            <h3>🍳 Kitchen Queue (Priority Queue)</h3>
-            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">O(log n) insertion/extraction | VIP orders prioritized | Status tracking enabled</p>
-            <div class="btn-group">
-                <button class="btn-success" onclick="processAdmin()">👨‍🍳 Cook Next Order</button>
-                <button class="btn-secondary" onclick="undoAdmin()">↩️ Undo (Stack)</button>
-                <button class="btn-secondary" onclick="loadAdminQueue()">🔄 Refresh</button>
-            </div>
-            <div id="adminQueueList" style="margin-top: 15px;"></div>
-        </div>
-
-        <!-- Popular Items Section -->
-        <div class="card">
-            <h3>📊 Popular Items Analytics</h3>
-            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">Hash Map Counter | O(n log n) sorting</p>
-            <button class="btn-success" onclick="loadPopularItems()">📈 Load Statistics</button>
-            <div id="popularItemsList" style="margin-top: 15px;"></div>
-        </div>
-
-        <!-- System Stats -->
-        <div class="card">
-            <h3>📐 System Statistics</h3>
-            <div id="sysStats"></div>
-        </div>
-    </div>
-
-    <!-- ==========================================
-         USER VIEW
-         ========================================== -->
-    <div id="user" class="view active">
-        <h2>🛒 Order Your Meal</h2>
-        
-        <div class="info-box">
-            <strong>✅ FIXED: Multi-User System</strong> • Each user has independent cart & session
-            <br><strong>Data Structures:</strong> Hash Map (Menu), Doubly Linked List (Cart), Trie (Search)
-        </div>
-
-        <div class="session-info" id="sessionInfo">
-            Session: Loading...
-        </div>
-
-        <div class="layout-container">
-            <!-- Menu Section -->
-            <div>
-                <h3>Browse Menu</h3>
-                <input type="text" id="searchBar" placeholder="🔍 Search by name..." onkeyup="loadMenu()">
-                <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Trie: O(m) search | Hash Map: O(1) lookup</p>
+    <div class="grid">
+        <div>
+            <div class="card">
+                <h3>Menu - Smart Food Restaurant</h3>
+                <input id="searchBar" placeholder="Search food..." onkeyup="loadMenu()">
                 <div id="menuContainer"></div>
             </div>
+        </div>
 
-            <!-- Cart Section -->
-            <div class="card" style="height: fit-content; position: sticky; top: 80px;">
-                <h3>🛒 Your Cart</h3>
-                <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Doubly Linked List: O(1) add/remove</p>
-                <div id="cartList" style="margin-bottom: 20px; min-height: 50px;">
-                    <div class="empty-state" style="padding: 20px; margin: 0;">
-                        <p>Cart is empty</p>
-                    </div>
-                </div>
-                
-                <hr style="margin: 15px 0;">
-                
-                <h3 style="margin-top: 15px;">Delivery Details</h3>
-                <input type="text" id="userDest" placeholder="Enter delivery address" value="Restaurant">
-                
-                <button class="btn-success" style="width: 100%; margin-bottom:10px;" onclick="checkout(false)">
-                    🚚 Standard Checkout
-                </button>
-                <button class="btn-vip" style="width: 100%;" onclick="checkout(true)">
-                    👑 VIP Checkout (Priority)
-                </button>
+        <div>
+            <div class="card">
+                <h3>Your Cart</h3>
+                <div id="cartList">Cart is empty</div>
+
+                <h3>Delivery Address</h3>
+                <input id="userDest" placeholder="Enter address" value="Customer_Home">
+
+                <br>
+                <button class="btn-success" onclick="checkout(false)">Standard Checkout</button>
+                <button class="btn-warning" onclick="checkout(true)">VIP Checkout</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- ==========================================
-         DRIVER VIEW
-         ========================================== -->
-    <div id="driver" class="view">
-        <h2>🚗 Driver Dashboard - Multi-Driver Delivery System</h2>
-        
-        <div class="info-box">
-            <strong>✅ FIXED: Multi-Driver Support</strong> • Each driver has independent assignment
-            <br><strong>Data Structures:</strong> Driver Status Tracking, Queue (FIFO), Graph + Dijkstra
-        </div>
+<!-- ADMIN DASHBOARD -->
+<div id="admin" class="view">
+    <h2 class="role-title">Admin Dashboard - Smart Food Restaurant</h2>
 
-        <!-- Driver Login Section -->
-        <div class="card">
-            <h3>🔐 Driver Login</h3>
-            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">Available drivers: 101, 102, 103</p>
-            <div class="form-section">
-                <div>
-                    <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 5px;">Driver ID</label>
-                    <input type="number" id="driverId" placeholder="Enter driver ID (101, 102, 103)" value="101" style="margin-bottom: 0;">
-                </div>
-                <button class="btn-success" onclick="driverLogin()" style="margin-bottom: 10px;">Login</button>
-                <button class="btn-secondary" onclick="logoutDriver()" style="margin-bottom: 10px;">Logout</button>
-            </div>
-            <div id="driverStatus" style="color: #94a3b8; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 6px;">❌ Not logged in</div>
-        </div>
-
-        <!-- Current Delivery Assignment -->
-        <div class="card">
-            <h3>📦 Current Delivery Assignment</h3>
-            <p style="color: #94a3b8; margin-bottom: 15px; font-size: 14px;">Auto-assigned by system | Dijkstra: O((V+E)log V)</p>
-            
-            <div id="deliveryInfo" style="margin-bottom: 20px;">
-                <div class="empty-state" style="padding: 30px;">
-                    <p>No active deliveries - Please login first</p>
-                    <button class="btn-secondary" onclick="loadDriver()" style="margin-top: 10px;">Check for Orders</button>
-                </div>
-            </div>
-
-            <div id="deliveryCard" style="display: none;">
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <div>
-                        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">Order ID</p>
-                        <p id="d-id" style="font-size: 20px; font-weight: bold; color: var(--accent);"></p>
-                    </div>
-                    <div>
-                        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">Status</p>
-                        <span class="status-badge status-pending" id="d-status">IN DELIVERY</span>
-                    </div>
-                </div>
-
-                <p style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">Items</p>
-                <p id="d-items" style="background: rgba(59, 130, 246, 0.05); padding: 10px; border-radius: 6px; margin-bottom: 15px; border-left: 3px solid var(--accent);"></p>
-
-                <p style="color: #94a3b8; font-size: 12px; margin-bottom: 5px;">📍 Delivery Address</p>
-                <p id="d-addr" style="font-size: 18px; color: var(--vip); font-weight: bold; margin-bottom: 20px;"></p>
-
-                <div class="btn-group" style="margin-bottom: 20px;">
-                    <button class="btn-success" onclick="getRoute()">📍 Calculate Route (Dijkstra)</button>
-                    <button class="btn-secondary" onclick="refreshDriver()">🔄 Refresh</button>
-                </div>
-
-                <div id="routeBox" style="display: none;"></div>
-
-                <button class="btn-success" style="width: 100%; padding: 15px;" onclick="completeDelivery()">
-                    ✅ Confirm Delivered
-                </button>
-            </div>
-        </div>
-
-        <!-- Driver Performance Stats -->
-        <div class="card">
-            <h3>📊 Your Performance</h3>
-            <div class="stats-box">
-                <div class="stat-item">
-                    <div class="stat-label">Completed Deliveries</div>
-                    <div class="stat-value" id="driverCompleted">0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Status</div>
-                    <div class="stat-value" id="driverCurrentStatus">--</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- System Wide Driver Stats -->
-        <div class="card">
-            <h3>🌐 System-Wide Driver Stats</h3>
-            <div class="stats-box">
-                <div class="stat-item">
-                    <div class="stat-label">Total Drivers</div>
-                    <div class="stat-value" id="totalDrivers">0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Available Now</div>
-                    <div class="stat-value" id="availableDrivers">0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Active Deliveries</div>
-                    <div class="stat-value" id="activeDeliveries">0</div>
-                </div>
-            </div>
-        </div>
+    <div class="card">
+        <p class="info">
+            Admin manages one restaurant menu. Food added here is shown to all users.
+        </p>
     </div>
 
-    <!-- JAVASCRIPT -->
-    <script>
-        // ==========================================
-        // SESSION MANAGEMENT - FIX #1
-        // ==========================================
-        let currentSessionId = null;
-        let currentDriverId = null;
-        let currentDeliveryAddress = "";
+    <div class="card">
+        <h3>Add Food Item</h3>
+        <input id="newId" type="number" placeholder="Food ID">
+        <input id="newName" placeholder="Food name">
+        <input id="newPrice" type="number" placeholder="Price">
+        <input id="newCat" placeholder="Category">
+        <button class="btn-success" onclick="addNewFood()">Add Food</button>
+    </div>
 
-        async function initializeSession() {
-            try {
-                const res = await fetch('/api/session/create');
-                const data = await res.json();
-                currentSessionId = data.sessionId;
-                console.log("✅ Session created:", currentSessionId);
-                localStorage.setItem('sessionId', currentSessionId);
-                document.getElementById('sessionInfo').innerHTML = 
-                    `✅ Session ID: ${currentSessionId.substring(0, 30)}...`;
-            } catch (e) {
-                console.error("Failed to create session:", e);
-                document.getElementById('sessionInfo').innerHTML = 
-                    `❌ Session creation failed`;
-            }
+    <div class="card">
+        <h3>Kitchen Queue - Priority Queue</h3>
+        <p class="info">
+            VIP orders are processed before normal orders using a heap-based priority queue.
+        </p>
+        <button class="btn-success" onclick="processAdmin()">Process Next Order</button>
+        <button onclick="undoAdmin()">Undo Last Processed</button>
+        <button onclick="loadAdminQueue()">Refresh Queue</button>
+        <div id="adminQueueList"></div>
+    </div>
+
+    <div class="card">
+        <h3>Popular Items - Analytics</h3>
+        <p class="info">
+            Ordered items are counted and sorted to find popular food items.
+        </p>
+        <button onclick="loadPopularItems()">Load Popular Items</button>
+        <div id="popularItemsList"></div>
+    </div>
+
+    <div class="card">
+        <h3>System Statistics</h3>
+        <div id="sysStats"></div>
+    </div>
+</div>
+
+<!-- DRIVER DASHBOARD -->
+<div id="driver" class="view">
+    <h2 class="role-title">Driver Dashboard</h2>
+
+    <div class="card">
+        <h3>Driver Status</h3>
+        <p id="driverStatus">Checking driver...</p>
+        <p class="info">
+            Drivers receive assigned orders and calculate the shortest path using graph and Dijkstra algorithm.
+        </p>
+        <button class="btn-success" onclick="loadDriver()">Refresh Assignment</button>
+    </div>
+
+    <div class="card">
+        <h3>Current Delivery Assignment</h3>
+        <div id="deliveryInfo">No assignment</div>
+        <div id="routeBox"></div>
+    </div>
+
+    <div class="card">
+        <h3>System Driver Statistics</h3>
+        <div id="driverStats"></div>
+    </div>
+</div>
+
+<script>
+let currentSessionId = null;
+let currentDriverId = null;
+let currentDeliveryAddress = "";
+
+// ================= AUTH / ROLE CHECK =================
+
+async function checkAuth() {
+    const role = localStorage.getItem("role");
+
+    if (!role) {
+        window.location.href = "/login.html";
+        return;
+    }
+
+    if (role === "user") {
+        const session = localStorage.getItem("session");
+
+        if (!session) {
+            localStorage.clear();
+            window.location.href = "/login.html";
+            return;
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            currentSessionId = localStorage.getItem('sessionId');
-            if (!currentSessionId) {
-                initializeSession();
-            } else {
-                document.getElementById('sessionInfo').innerHTML = 
-                    `✅ Session ID: ${currentSessionId.substring(0, 30)}...`;
-            }
+        const res = await fetch(`/api/check?session=${encodeURIComponent(session)}`);
+        const data = await res.json();
+
+        if (data.status !== "valid") {
+            localStorage.clear();
+            window.location.href = "/login.html";
+            return;
+        }
+
+        currentSessionId = session;
+        document.getElementById("sessionInfo").innerText = `Logged in as ${data.user}`;
+
+        showOnlyRole("user");
+    }
+
+    else if (role === "admin") {
+        const adminLoggedIn = localStorage.getItem("adminLoggedIn");
+
+        if (adminLoggedIn !== "true") {
+            localStorage.clear();
+            window.location.href = "/login.html";
+            return;
+        }
+
+        showOnlyRole("admin");
+    }
+
+    else if (role === "driver") {
+        const driverId = localStorage.getItem("driverId");
+        const driverName = localStorage.getItem("driverName");
+
+        if (!driverId) {
+            localStorage.clear();
+            window.location.href = "/login.html";
+            return;
+        }
+
+        currentDriverId = driverId;
+        document.getElementById("driverStatus").innerText =
+            `Logged in as ${driverName} (ID: ${driverId})`;
+
+        showOnlyRole("driver");
+    }
+
+    else {
+        localStorage.clear();
+        window.location.href = "/login.html";
+    }
+}
+
+function showOnlyRole(role) {
+    document.getElementById("user").classList.remove("active");
+    document.getElementById("admin").classList.remove("active");
+    document.getElementById("driver").classList.remove("active");
+
+    document.getElementById("userNav").style.display = "none";
+    document.getElementById("adminNav").style.display = "none";
+    document.getElementById("driverNav").style.display = "none";
+
+    if (role === "user") {
+        document.getElementById("user").classList.add("active");
+        document.getElementById("userNav").style.display = "inline-block";
+    }
+
+    if (role === "admin") {
+        document.getElementById("admin").classList.add("active");
+        document.getElementById("adminNav").style.display = "inline-block";
+    }
+
+    if (role === "driver") {
+        document.getElementById("driver").classList.add("active");
+        document.getElementById("driverNav").style.display = "inline-block";
+    }
+}
+
+function switchView(id) {
+    const role = localStorage.getItem("role");
+
+    if (id !== role) {
+        alert("You do not have permission to access this dashboard.");
+        return;
+    }
+
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+
+    refreshAll();
+}
+
+async function logout() {
+    const role = localStorage.getItem("role");
+
+    if (role === "user") {
+        const session = localStorage.getItem("session");
+
+        if (session) {
+            await fetch(`/api/logout?session=${encodeURIComponent(session)}`);
+        }
+    }
+
+    localStorage.clear();
+    window.location.href = "/login.html";
+}
+
+// ================= REFRESH =================
+
+async function refreshAll() {
+    const role = localStorage.getItem("role");
+
+    if (role === "user") {
+        await loadMenu();
+        await loadCart();
+    }
+
+    if (role === "admin") {
+        await loadAdminQueue();
+        await loadPopularItems();
+        await loadSystemStats();
+    }
+
+    if (role === "driver") {
+        await loadDriver();
+        await loadSystemStats();
+    }
+}
+
+// ================= USER FUNCTIONS =================
+
+async function loadMenu() {
+    const qElement = document.getElementById("searchBar");
+    const q = qElement ? qElement.value : "";
+
+    const res = await fetch(`/api/menu?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+
+    let html = "";
+
+    for (const [category, items] of Object.entries(data)) {
+        html += `<h3>${category}</h3>`;
+
+        items.forEach(item => {
+            html += `
+                <div class="item">
+                    <div>
+                        <strong>${item.name}</strong><br>
+                        Rs. ${item.price}
+                    </div>
+                    <button class="btn-success" onclick="addToCart('${item.name.replace(/'/g, "\\'")}', ${item.price})">
+                        Add
+                    </button>
+                </div>
+            `;
         });
+    }
 
-        // ==========================================
-        // VIEW SWITCHING
-        // ==========================================
-        function switchView(id) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            event.target.classList.add('active');
-            refreshAll();
-        }
+    if (!html) {
+        html = "<p>No items found.</p>";
+    }
 
-        function refreshAll() {
-            loadMenu();
-            loadCart();
-            loadAdminQueue();
-            loadPopularItems();
-            loadDriver();
-            loadSystemStats();
-        }
+    document.getElementById("menuContainer").innerHTML = html;
+}
 
-        // ==========================================
-        // ADMIN FUNCTIONS
-        // ==========================================
+async function addToCart(item, price) {
+    if (!currentSessionId) {
+        alert("Please login again.");
+        return;
+    }
 
-        async function addNewFood() {
-            let id = document.getElementById('newId').value;
-            let name = document.getElementById('newName').value;
-            let price = document.getElementById('newPrice').value;
-            let cat = document.getElementById('newCat').value;
+    const res = await fetch(
+        `/api/cart/add?sessionId=${encodeURIComponent(currentSessionId)}&item=${encodeURIComponent(item)}&price=${price}`
+    );
 
-            if (!id || !name || !price || !cat) {
-                alert("❌ Please fill all fields!");
-                return;
-            }
+    const data = await res.json();
 
-            try {
-                const res = await fetch(`/api/menu/add?id=${id}&name=${name}&price=${price}&category=${cat}`);
-                const data = await res.json();
-                
-                if (data.status === "success") {
-                    alert("✅ Food item added successfully!");
-                    document.getElementById('newId').value = "";
-                    document.getElementById('newName').value = "";
-                    document.getElementById('newPrice').value = "";
-                    document.getElementById('newCat').value = "";
-                    loadMenu();
-                }
-            } catch (e) {
-                alert("❌ Error adding food item");
-            }
-        }
+    if (data.status === "added") {
+        loadCart();
+    } else {
+        alert("Could not add item. Please login again.");
+    }
+}
 
-        async function loadAdminQueue() {
-            try {
-                const res = await fetch('/api/admin/queue');
-                const data = await res.json();
-                
-                let html = "";
-                if (data.length === 0) {
-                    html = '<div class="empty-state" style="padding: 30px;"><p>No orders in queue</p></div>';
-                } else {
-                    data.forEach(o => {
-                        html += `<div class="card ${o.vip ? 'vip-order' : ''}">
-                            <div style="display: flex; justify-content: space-between; align-items: start;">
-                                <div>
-                                    <h4 style="margin: 0 0 8px 0;">Order #${o.id}</h4>
-                                    <p style="margin: 0 0 8px 0; color: #cbd5e1; font-size: 14px;">${o.items}</p>
-                                    <span class="status-badge status-pending">${o.status}</span>
-                                </div>
-                                ${o.vip ? '<span class="status-badge btn-vip" style="height: fit-content;">👑 VIP</span>' : ''}
-                            </div>
-                        </div>`;
-                    });
-                }
-                document.getElementById('adminQueueList').innerHTML = html;
-            } catch (e) {
-                console.error("Error loading queue:", e);
-            }
-        }
+async function loadCart() {
+    if (!currentSessionId) return;
 
-        async function processAdmin() {
-            try {
-                const res = await fetch('/api/admin/process');
-                const data = await res.json();
-                if (data.status === "success") {
-                    loadAdminQueue();
-                    loadDriver();
-                    alert("✅ Order sent to kitchen!");
-                } else {
-                    alert("❌ Queue is empty");
-                }
-            } catch (e) {
-                alert("❌ Error processing order");
-            }
-        }
+    const res = await fetch(`/api/cart/view?sessionId=${encodeURIComponent(currentSessionId)}`);
+    const data = await res.json();
 
-        async function undoAdmin() {
-            try {
-                const res = await fetch('/api/admin/undo');
-                const data = await res.json();
-                if (data.status === "success") {
-                    loadAdminQueue();
-                    alert("✅ Last order restored!");
-                }
-            } catch (e) {
-                alert("❌ Error undoing operation");
-            }
-        }
+    let html = "";
+    let total = 0;
 
-        async function loadPopularItems() {
-            try {
-                const res = await fetch('/api/analytics/popular?limit=10');
-                const data = await res.json();
-                
-                let html = "";
-                if (data.length === 0) {
-                    html = '<div class="empty-state"><p>No items ordered yet</p></div>';
-                } else {
-                    html = '<div class="grid">';
-                    data.forEach(item => {
-                        html += `<div class="grid-item">
-                            <h4 style="margin: 0 0 10px 0; color: var(--accent);">${item.item}</h4>
-                            <p style="margin: 0; color: var(--success); font-size: 18px; font-weight: bold;">
-                                ${item.count} order${item.count !== 1 ? 's' : ''}
-                            </p>
-                        </div>`;
-                    });
-                    html += '</div>';
-                }
-                document.getElementById('popularItemsList').innerHTML = html;
-            } catch (e) {
-                console.error("Error loading popular items:", e);
-            }
-        }
+    data.forEach(item => {
+        html += `
+            <div class="item">
+                <span>${item.item}</span>
+                <strong>Rs. ${item.price}</strong>
+            </div>
+        `;
 
-        async function loadSystemStats() {
-            try {
-                const res = await fetch('/api/analytics/stats');
-                const data = await res.json();
-                
-                const html = `
-                    <div class="stats-box">
-                        <div class="stat-item">
-                            <div class="stat-label">Kitchen Queue</div>
-                            <div class="stat-value">${data.queue_size}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Active Sessions</div>
-                            <div class="stat-value">${data.active_sessions}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Total Drivers</div>
-                            <div class="stat-value">${data.total_drivers}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Available Drivers</div>
-                            <div class="stat-value" style="color: var(--success);">${data.available_drivers}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Undo History</div>
-                            <div class="stat-value">${data.history_size}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Unique Items</div>
-                            <div class="stat-value">${data.unique_items_ordered}</div>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('sysStats').innerHTML = html;
-                
-                // Update driver dashboard stats
-                document.getElementById('totalDrivers').innerText = data.total_drivers;
-                document.getElementById('availableDrivers').innerText = data.available_drivers;
-                document.getElementById('activeDeliveries').innerText = 
-                    data.total_drivers - data.available_drivers;
-            } catch (e) {
-                console.error("Error loading stats:", e);
-            }
-        }
+        total += item.price;
+    });
 
-        // ==========================================
-        // USER FUNCTIONS - SESSION BASED
-        // ==========================================
+    if (!html) {
+        html = "<p>Cart is empty.</p>";
+    } else {
+        html += `<h3>Total: Rs. ${total}</h3>`;
+    }
 
-        async function loadMenu() {
-            try {
-                let q = document.getElementById('searchBar').value;
-                const res = await fetch(`/api/menu?q=${q}`);
-                const categories = await res.json();
-                
-                let html = "";
-                let hasItems = false;
+    document.getElementById("cartList").innerHTML = html;
+}
 
-                for (const [category, items] of Object.entries(categories)) {
-                    if (items.length > 0) {
-                        hasItems = true;
-                        html += `<h3 class="category-header">${category}</h3>`;
-                        items.forEach(i => {
-                            html += `<div class="menu-item">
-                                <div class="item-info">
-                                    <div class="item-name">${i.name}</div>
-                                    <div class="item-price">Rs. ${i.price}</div>
-                                </div>
-                                <div class="item-buttons">
-                                    <button class="btn-success" onclick="addToCart('${i.name.replace(/'/g, "\\'")}', ${i.price})">Add</button>
-                                </div>
-                            </div>`;
-                        });
-                    }
-                }
+async function checkout(isVIP) {
+    const address = document.getElementById("userDest").value;
 
-                if (!hasItems) {
-                    html = '<div class="empty-state"><p>No items found</p></div>';
-                }
+    if (!address) {
+        alert("Please enter delivery address.");
+        return;
+    }
 
-                document.getElementById('menuContainer').innerHTML = html;
-            } catch (e) {
-                console.error("Error loading menu:", e);
-            }
-        }
+    if (!currentSessionId) {
+        alert("Please login again.");
+        return;
+    }
 
-        async function addToCart(item, price) {
-            if (!currentSessionId) {
-                alert("❌ Session not initialized");
-                return;
-            }
-            try {
-                const res = await fetch(`/api/cart/add?sessionId=${currentSessionId}&item=${encodeURIComponent(item)}&price=${price}`);
-                const data = await res.json();
-                if (data.status === "added") {
-                    loadCart();
-                } else {
-                    alert("❌ Error adding to cart");
-                }
-            } catch (e) {
-                alert("❌ Error adding to cart");
-            }
-        }
+    const res = await fetch(
+        `/api/checkout?sessionId=${encodeURIComponent(currentSessionId)}&vip=${isVIP}&address=${encodeURIComponent(address)}`
+    );
 
-        async function loadCart() {
-            if (!currentSessionId) return;
-            
-            try {
-                const res = await fetch(`/api/cart/view?sessionId=${currentSessionId}`);
-                const data = await res.json();
-                
-                let html = "";
-                let total = 0;
+    const data = await res.json();
 
-                if (data.length === 0) {
-                    html = '<div class="empty-state" style="padding: 20px; margin: 0;"><p>Cart is empty</p></div>';
-                } else {
-                    data.forEach(i => {
-                        html += `<div class="cart-item">
-                            <span>${i.item}</span>
-                            <strong style="color: var(--success);">Rs. ${i.price}</strong>
-                        </div>`;
-                        total += i.price;
-                    });
-                    html += `<div class="cart-total">Total: Rs. ${total}</div>`;
-                }
+    if (data.status === "success") {
+        alert(`Order #${data.order_id} placed successfully.`);
+        loadCart();
+    } else if (data.status === "empty_cart") {
+        alert("Cart is empty.");
+    } else {
+        alert("Checkout failed.");
+    }
+}
 
-                document.getElementById('cartList').innerHTML = html;
-            } catch (e) {
-                console.error("Error loading cart:", e);
-            }
-        }
+// ================= ADMIN FUNCTIONS =================
 
-        async function checkout(isVIP) {
-            if (!currentSessionId) {
-                alert("❌ Session not initialized");
-                return;
-            }
-            
-            try {
-                let address = document.getElementById('userDest').value;
-                if (!address) {
-                    alert("❌ Please enter delivery address!");
-                    return;
-                }
+async function addNewFood() {
+    const id = document.getElementById("newId").value;
+    const name = document.getElementById("newName").value;
+    const price = document.getElementById("newPrice").value;
+    const category = document.getElementById("newCat").value;
 
-                const res = await fetch(`/api/checkout?sessionId=${currentSessionId}&vip=${isVIP}&address=${encodeURIComponent(address)}`);
-                const data = await res.json();
+    if (!id || !name || !price || !category) {
+        alert("Fill all fields.");
+        return;
+    }
 
-                if (data.status === "success") {
-                    alert(`✅ Order #${data.order_id} placed! ${data.vip ? '👑 VIP Priority' : ''}`);
-                    loadCart();
-                    loadAdminQueue();
-                } else if (data.status === "empty_cart") {
-                    alert("❌ Cart is empty!");
-                }
-            } catch (e) {
-                alert("❌ Error during checkout");
-            }
-        }
+    const res = await fetch(
+        `/api/menu/add?id=${id}&name=${encodeURIComponent(name)}&price=${price}&category=${encodeURIComponent(category)}`
+    );
 
-        // ==========================================
-        // DRIVER FUNCTIONS - MULTI-DRIVER
-        // ==========================================
+    const data = await res.json();
 
-        async function driverLogin() {
-            const driverId = document.getElementById('driverId').value;
-            
-            if (!driverId) {
-                alert("❌ Please enter driver ID");
-                return;
-            }
-            
-            try {
-                const res = await fetch(`/api/driver/login?driverId=${driverId}`);
-                const data = await res.json();
-                
-                if (data.status === "success") {
-                    currentDriverId = driverId;
-                    document.getElementById('driverStatus').innerHTML = 
-                        `✅ Logged in as ${data.name} (ID: ${driverId})`;
-                    loadDriver();
-                } else {
-                    alert("❌ Driver not found");
-                }
-            } catch (e) {
-                alert("❌ Login failed");
-            }
-        }
+    if (data.status === "success") {
+        alert("Food added to restaurant menu.");
 
-        function logoutDriver() {
-            currentDriverId = null;
-            document.getElementById('driverStatus').innerHTML = "❌ Not logged in";
-            document.getElementById('deliveryInfo').style.display = 'block';
-            document.getElementById('deliveryCard').style.display = 'none';
-        }
+        document.getElementById("newId").value = "";
+        document.getElementById("newName").value = "";
+        document.getElementById("newPrice").value = "";
+        document.getElementById("newCat").value = "";
 
-        async function loadDriver() {
-            if (!currentDriverId) {
-                return;
-            }
-            
-            try {
-                const res = await fetch(`/api/driver/next-assignment?driverId=${currentDriverId}`);
-                const data = await res.json();
+        loadSystemStats();
+    } else {
+        alert("Could not add food.");
+    }
+}
 
-                if (data.id) {
-                    document.getElementById('deliveryInfo').style.display = 'none';
-                    document.getElementById('deliveryCard').style.display = 'block';
-                    document.getElementById('d-id').innerText = `Order #${data.id}`;
-                    document.getElementById('d-items').innerText = data.items || "Loading...";
-                    document.getElementById('d-addr').innerText = `📍 ${data.address}`;
-                    document.getElementById('d-status').innerText = data.status || "IN DELIVERY";
-                    currentDeliveryAddress = data.address;
-                    document.getElementById('routeBox').style.display = 'none';
-                    document.getElementById('routeBox').innerHTML = '';
-                    document.getElementById('driverCurrentStatus').innerText = 'ON DELIVERY';
-                } else {
-                    document.getElementById('deliveryInfo').style.display = 'block';
-                    document.getElementById('deliveryCard').style.display = 'none';
-                    document.getElementById('driverCurrentStatus').innerText = 'AVAILABLE';
-                }
-                
-                loadSystemStats();
-            } catch (e) {
-                console.error("Error loading driver queue:", e);
-            }
-        }
+async function loadAdminQueue() {
+    const res = await fetch("/api/admin/queue");
+    const data = await res.json();
 
-        function refreshDriver() {
-            loadDriver();
-        }
+    let html = "";
 
-        async function getRoute() {
-            if (!currentDeliveryAddress) return;
+    data.forEach(order => {
+        html += `
+            <div class="item">
+                <div>
+                    <strong>Order #${order.id}</strong>
+                    ${order.vip ? '<span class="badge">VIP</span>' : ''}
+                    <br>
+                    Items: ${order.items}<br>
+                    Address: ${order.address}<br>
+                    Status: ${order.status}
+                </div>
+            </div>
+        `;
+    });
 
-            try {
-                const res = await fetch(`/api/route?dest=${encodeURIComponent(currentDeliveryAddress)}`);
-                const data = await res.json();
+    if (!html) {
+        html = "<p>No orders in queue.</p>";
+    }
 
-                const html = `
-                    <div class="route-info">
-                        <strong>🗺️ Optimal Route (Dijkstra Algorithm)</strong><br>
-                        📍 ${data.path}<br><br>
-                        <strong>📏 Total Distance:</strong> ${data.distance} km
-                    </div>
-                `;
-                document.getElementById('routeBox').innerHTML = html;
-                document.getElementById('routeBox').style.display = 'block';
-            } catch (e) {
-                alert("❌ Error calculating route");
-            }
-        }
+    document.getElementById("adminQueueList").innerHTML = html;
+}
 
-        async function completeDelivery() {
-            if (!currentDriverId) return;
-            
-            try {
-                const res = await fetch(`/api/driver/complete?driverId=${currentDriverId}`);
-                const data = await res.json();
-                
-                if (data.status === "success") {
-                    alert("✅ Delivery confirmed!");
-                    loadDriver();
-                }
-            } catch (e) {
-                alert("❌ Error confirming delivery");
-            }
-        }
+async function processAdmin() {
+    const res = await fetch("/api/admin/process");
+    const data = await res.json();
 
-        // Initialize
+    if (data.status === "success") {
+        alert(`Order #${data.order_id} processed. Driver: ${data.assignedDriverId}`);
         refreshAll();
-        setInterval(refreshAll, 2000);
-    </script>
+    } else {
+        alert("Queue is empty.");
+    }
+}
+
+async function undoAdmin() {
+    const res = await fetch("/api/admin/undo");
+    const data = await res.json();
+
+    if (data.status === "success") {
+        alert("Last processed order restored.");
+        refreshAll();
+    } else {
+        alert("No history.");
+    }
+}
+
+async function loadPopularItems() {
+    const res = await fetch("/api/analytics/popular?limit=10");
+    const data = await res.json();
+
+    let html = "";
+
+    data.forEach(item => {
+        html += `
+            <div class="item">
+                <strong>${item.item}</strong>
+                <span>${item.count} orders</span>
+            </div>
+        `;
+    });
+
+    if (!html) {
+        html = "<p>No analytics yet.</p>";
+    }
+
+    document.getElementById("popularItemsList").innerHTML = html;
+}
+
+async function loadSystemStats() {
+    const res = await fetch("/api/analytics/stats");
+    const data = await res.json();
+
+    const html = `
+        <p>Queue Size: ${data.queue_size}</p>
+        <p>Active Cart Sessions: ${data.active_sessions}</p>
+        <p>Total Drivers: ${data.total_drivers}</p>
+        <p>Available Drivers: ${data.available_drivers}</p>
+        <p>Undo History Size: ${data.history_size}</p>
+        <p>Unique Ordered Items: ${data.unique_items_ordered}</p>
+        <p>Graph Nodes: ${data.graph_nodes}</p>
+        <p>Menu Items: ${data.menu_items}</p>
+    `;
+
+    if (document.getElementById("sysStats")) {
+        document.getElementById("sysStats").innerHTML = html;
+    }
+
+    if (document.getElementById("driverStats")) {
+        document.getElementById("driverStats").innerHTML = html;
+    }
+}
+
+// ================= DRIVER FUNCTIONS =================
+
+async function loadDriver() {
+    if (!currentDriverId) {
+        currentDriverId = localStorage.getItem("driverId");
+    }
+
+    if (!currentDriverId) return;
+
+    const res = await fetch(`/api/driver/next-assignment?driverId=${currentDriverId}`);
+    const data = await res.json();
+
+    if (data.id) {
+        currentDeliveryAddress = data.address;
+
+        document.getElementById("deliveryInfo").innerHTML = `
+            <p><strong>Order #${data.id}</strong></p>
+            <p>Items: ${data.items}</p>
+            <p>Address: ${data.address}</p>
+            <p>Status: ${data.status}</p>
+            <button class="btn-success" onclick="getRoute()">Calculate Route</button>
+            <button class="btn-warning" onclick="completeDelivery()">Complete Delivery</button>
+        `;
+    } else {
+        currentDeliveryAddress = "";
+        document.getElementById("deliveryInfo").innerHTML = "<p>No current delivery.</p>";
+        document.getElementById("routeBox").innerHTML = "";
+    }
+}
+
+async function getRoute() {
+    if (!currentDeliveryAddress) {
+        alert("No address assigned.");
+        return;
+    }
+
+    const res = await fetch(`/api/route?dest=${encodeURIComponent(currentDeliveryAddress)}`);
+    const data = await res.json();
+
+    document.getElementById("routeBox").innerHTML = `
+        <div class="route">
+            <strong>Dijkstra Shortest Route</strong><br>
+            Path: ${data.path}<br>
+            Distance: ${data.distance} km
+        </div>
+    `;
+}
+
+async function completeDelivery() {
+    const res = await fetch(`/api/driver/complete?driverId=${currentDriverId}`);
+    const data = await res.json();
+
+    if (data.status === "success") {
+        alert("Delivery completed.");
+        loadDriver();
+        loadSystemStats();
+    } else {
+        alert("Could not complete delivery.");
+    }
+}
+
+// ================= START =================
+
+window.addEventListener("DOMContentLoaded", async () => {
+    await checkAuth();
+    await refreshAll();
+});
+
+setInterval(() => {
+    const role = localStorage.getItem("role");
+
+    if (role) {
+        refreshAll();
+    }
+}, 5000);
+</script>
+
 </body>
 </html>
