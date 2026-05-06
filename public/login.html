@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Food Delivery System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .box {
+            background: #1e293b;
+            width: 400px;
+            padding: 35px 30px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 42px;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            color: #38bdf8;
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .sub {
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        .role-section {
+            margin-bottom: 20px;
+        }
+
+        .role-section h3 {
+            color: #94a3b8;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .role-btn {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 8px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .role-btn:hover { background: #1e3a5f; border-color: #3b82f6; }
+        .role-btn .icon { font-size: 22px; }
+
+        .form-section { display: none; }
+        .form-section.active { display: block; }
+
+        input {
+            width: 100%;
+            padding: 11px 14px;
+            margin-bottom: 10px;
+            border-radius: 7px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus { border-color: #3b82f6; }
+
+        .btn-row { display: flex; gap: 8px; margin-top: 4px; }
+
+        button {
+            flex: 1;
+            padding: 11px;
+            border: none;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-gray { background: #334155; color: white; }
+        .btn-gray:hover { background: #475569; }
+
+        #msg {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            min-height: 16px;
+            text-align: center;
+        }
+
+        .msg-ok  { background: #064e3b; color: #6ee7b7; }
+        .msg-err { background: #450a0a; color: #fca5a5; }
+
+        .dsa-badge {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .dsa-badge span {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <div class="logo">🍕</div>
+    <h2>Food Delivery System</h2>
+    <p class="sub">DSA-Based Ordering Platform</p>
+
+    <!-- Dashboard Selection -->
+    <div id="selectSection" class="form-section active">
+        <div class="role-section">
+            <h3>Select your role</h3>
+            <button class="role-btn" onclick="showSection('userSection')">
+                <span class="icon">👤</span>
+                <div>
+                    <strong>User</strong><br>
+                    <small style="color:#64748b">Browse menu and place orders</small>
+                </div>
+            </button>
+            <button class="role-btn" onclick="showSection('adminSection')">
+                <span class="icon">👨‍🍳</span>
+                <div>
+                    <strong>Admin</strong><br>
+                    <small style="color:#64748b">Manage kitchen queue and menu</small>
+                </div>
+            </button>
+            <button class="role-btn" onclick="showSection('driverSection')">
+                <span class="icon">🚗</span>
+                <div>
+                    <strong>Driver</strong><br>
+                    <small style="color:#64748b">View assignments and deliveries</small>
+                </div>
+            </button>
+        </div>
+
+        <div class="dsa-badge">
+            <span>HashMap</span><span>Linked List</span><span>Trie</span>
+            <span>Priority Queue</span><span>Stack</span><span>Dijkstra</span>
+        </div>
+    </div>
+
+    <!-- User Login -->
+    <div id="userSection" class="form-section">
+        <h3 style="color:#38bdf8; margin-bottom:15px">👤 User Login / Register</h3>
+        <input id="userName" placeholder="Username" autocomplete="off">
+        <input id="userPass" type="password" placeholder="Password">
+        <div class="btn-row">
+            <button class="btn-success" onclick="registerUser()">Register</button>
+            <button class="btn-primary" onclick="loginUser()">Login</button>
+        </div>
+        <button class="btn-gray" style="width:100%; margin-top:8px" onclick="showSection('selectSection')">← Back</button>
+    </div>
+
+    <!-- Admin Login -->
+    <div id="adminSection" class="form-section">
+        <h3 style="color:#38bdf8; margin-bottom:15px">👨‍🍳 Admin Login</h3>
+        <input id="adminPass" type="password" placeholder="Admin Password">
+        <div class="btn-row">
+            <button class="btn-primary" onclick="openAdmin()">Login as Admin</button>
+        </div>
+        <button class="btn-gray" style="width:100%; margin-top:8px" onclick="showSection('selectSection')">← Back</button>
+    </div>
+
+    <!-- Driver Login -->
+    <div id="driverSection" class="form-section">
+        <h3 style="color:#38bdf8; margin-bottom:15px">🚗 Driver Login</h3>
+        <p style="color:#64748b; font-size:13px; margin-bottom:10px">Available IDs: 101, 102, 103</p>
+        <input id="driverId" type="number" placeholder="Enter Driver ID">
+        <div class="btn-row">
+            <button class="btn-primary" onclick="loginDriver()">Login</button>
+        </div>
+        <button class="btn-gray" style="width:100%; margin-top:8px" onclick="showSection('selectSection')">← Back</button>
+    </div>
+
+    <div id="msg"></div>
+</div>
+
+<script>
+function showSection(id) {
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('msg').innerText = '';
+    document.getElementById('msg').className = '';
+}
+
+function showMsg(text, isOk) {
+    const el = document.getElementById('msg');
+    el.innerText = text;
+    el.className = isOk ? 'msg-ok' : 'msg-err';
+}
+
+async function registerUser() {
+    const username = document.getElementById('userName').value.trim();
+    const password = document.getElementById('userPass').value;
+
+    if (!username || !password) {
+        showMsg('Please fill in both fields.', false);
+        return;
+    }
+
+    const res  = await fetch(`/api/register?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
+    const data = await res.json();
+
+    if (data.status === 'registered') {
+        showMsg('Registered! Now click Login.', true);
+    } else if (data.status === 'exists') {
+        showMsg('Username already taken.', false);
+    } else {
+        showMsg('Registration failed.', false);
+    }
+}
+
+async function loginUser() {
+    const username = document.getElementById('userName').value.trim();
+    const password = document.getElementById('userPass').value;
+
+    if (!username || !password) {
+        showMsg('Please fill in both fields.', false);
+        return;
+    }
+
+    const res  = await fetch(`/api/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
+    const data = await res.json();
+
+    if (data.status === 'success') {
+        localStorage.clear();
+        localStorage.setItem('session', data.session);
+        localStorage.setItem('role', 'user');
+        window.location.href = '/index.html';
+    } else {
+        showMsg('Wrong username or password.', false);
+    }
+}
+
+function openAdmin() {
+    const pass = document.getElementById('adminPass').value;
+    // simple hardcoded admin password
+    if (pass !== 'admin123') {
+        showMsg('Wrong admin password.', false);
+        return;
+    }
+    localStorage.clear();
+    localStorage.setItem('role', 'admin');
+    localStorage.setItem('adminLoggedIn', 'true');
+    window.location.href = '/index.html';
+}
+
+async function loginDriver() {
+    const driverId = document.getElementById('driverId').value;
+    if (!driverId) {
+        showMsg('Please enter your Driver ID.', false);
+        return;
+    }
+
+    const res  = await fetch(`/api/driver/login?driverId=${driverId}`);
+    const data = await res.json();
+
+    if (data.status === 'success') {
+        localStorage.clear();
+        localStorage.setItem('role', 'driver');
+        localStorage.setItem('driverId', driverId);
+        localStorage.setItem('driverName', data.name);
+        window.location.href = '/index.html';
+    } else {
+        showMsg('Driver ID not found. Try 101, 102, or 103.', false);
+    }
+}
+</script>
+
+</body>
+</html>
