@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Dashboard - Smart Food Delivery</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .box {
+            background: #1e293b;
+            width: 390px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        h2 {
+            color: #38bdf8;
+            margin-bottom: 10px;
+        }
+
+        h3 {
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: #94a3b8;
+        }
+
+        input {
+            width: 90%;
+            padding: 12px;
+            margin: 8px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background: #020617;
+            color: white;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        button {
+            width: 90%;
+            padding: 12px;
+            margin: 8px;
+            border: none;
+            border-radius: 6px;
+            background: #3b82f6;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        .role-btn {
+            background: #334155;
+            font-size: 16px;
+        }
+
+        .role-btn:hover {
+            background: #475569;
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: black;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+            color: black;
+        }
+
+        .back {
+            background: #64748b;
+        }
+
+        .back:hover {
+            background: #475569;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #msg {
+            color: #f59e0b;
+            font-weight: bold;
+            min-height: 22px;
+        }
+
+        .small {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+    <h2>Smart Food Delivery</h2>
+    <p class="small">DSA Based Food Ordering System</p>
+
+    <!-- FIRST PAGE: DASHBOARD SELECTION -->
+    <div id="dashboardSelect">
+        <h3>Select Dashboard</h3>
+
+        <button class="role-btn" onclick="showUserLogin()">User Dashboard</button>
+        <button class="role-btn" onclick="openAdmin()">Admin Dashboard</button>
+        <button class="role-btn" onclick="showDriverLogin()">Driver Dashboard</button>
+    </div>
+
+    <!-- USER LOGIN / REGISTER -->
+    <div id="userLogin" class="hidden">
+        <h3>User Login / Register</h3>
+
+        <input id="userName" placeholder="Username">
+        <input id="userPass" type="password" placeholder="Password">
+
+        <button class="btn-success" onclick="registerUser()">Register</button>
+        <button class="btn-warning" onclick="loginUser()">Login</button>
+        <button class="back" onclick="backToSelect()">Back</button>
+    </div>
+
+    <!-- DRIVER LOGIN -->
+    <div id="driverLogin" class="hidden">
+        <h3>Driver Login</h3>
+
+        <p class="small">Available Driver IDs: 101, 102, 103</p>
+
+        <input id="driverId" type="number" placeholder="Enter Driver ID">
+
+        <button class="btn-success" onclick="loginDriver()">Login Driver</button>
+        <button class="back" onclick="backToSelect()">Back</button>
+    </div>
+
+    <p id="msg"></p>
+</div>
+
+<script>
+function hideAll() {
+    document.getElementById("dashboardSelect").classList.add("hidden");
+    document.getElementById("userLogin").classList.add("hidden");
+    document.getElementById("driverLogin").classList.add("hidden");
+    document.getElementById("msg").innerText = "";
+}
+
+function backToSelect() {
+    hideAll();
+    document.getElementById("dashboardSelect").classList.remove("hidden");
+}
+
+function showUserLogin() {
+    hideAll();
+    document.getElementById("userLogin").classList.remove("hidden");
+}
+
+function showDriverLogin() {
+    hideAll();
+    document.getElementById("driverLogin").classList.remove("hidden");
+}
+
+// Admin opens directly, no login required
+function openAdmin() {
+    localStorage.clear();
+    localStorage.setItem("role", "admin");
+    localStorage.setItem("adminLoggedIn", "true");
+    window.location.href = "/index.html";
+}
+
+async function registerUser() {
+    let username = document.getElementById("userName").value;
+    let password = document.getElementById("userPass").value;
+
+    if (!username || !password) {
+        document.getElementById("msg").innerText = "Please enter username and password.";
+        return;
+    }
+
+    let res = await fetch(
+        `/api/register?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+    );
+
+    let data = await res.json();
+
+    if (data.status === "registered") {
+        document.getElementById("msg").innerText = "Registered successfully. Now login.";
+    } else if (data.status === "exists") {
+        document.getElementById("msg").innerText = "User already exists.";
+    } else {
+        document.getElementById("msg").innerText = "Registration failed.";
+    }
+}
+
+async function loginUser() {
+    let username = document.getElementById("userName").value;
+    let password = document.getElementById("userPass").value;
+
+    if (!username || !password) {
+        document.getElementById("msg").innerText = "Please enter username and password.";
+        return;
+    }
+
+    let res = await fetch(
+        `/api/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+    );
+
+    let data = await res.json();
+
+    if (data.status === "success") {
+        localStorage.clear();
+        localStorage.setItem("session", data.session);
+        localStorage.setItem("role", "user");
+        window.location.href = "/index.html";
+    } else {
+        document.getElementById("msg").innerText = "User login failed.";
+    }
+}
+
+async function loginDriver() {
+    let driverId = document.getElementById("driverId").value;
+
+    if (!driverId) {
+        document.getElementById("msg").innerText = "Please enter driver ID.";
+        return;
+    }
+
+    let res = await fetch(`/api/driver/login?driverId=${driverId}`);
+    let data = await res.json();
+
+    if (data.status === "success") {
+        localStorage.clear();
+        localStorage.setItem("role", "driver");
+        localStorage.setItem("driverId", driverId);
+        localStorage.setItem("driverName", data.name);
+        window.location.href = "/index.html";
+    } else {
+        document.getElementById("msg").innerText = "Driver not found.";
+    }
+}
+</script>
+
+</body>
+</html>
