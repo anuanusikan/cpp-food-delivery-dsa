@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include "../models/Order.h"
 #include "../ds/Cart.h"
 #include "../ds/OrderQueue.h"
@@ -10,12 +11,15 @@
 class OrderService {
 private:
     int nextOrderId;
+
     CartManager& cartManager;
     OrderQueue& orderQueue;
     OrderHistory& orderHistory;
     Analytics& analytics;
     Graph& graph;
     DriverService& driverService;
+
+    vector<Order> lastAssignedBatch;
 
 public:
     OrderService(
@@ -27,7 +31,11 @@ public:
         DriverService& driverRef
     );
 
-    Order checkout(string sessionId, string address, bool isVIP);
+   Order checkout(string sessionId, string nearestLocation, int userDistance, bool isVIP);
+
     Order processNextOrder();
+
     Order undoLastOrder();
+
+    vector<Order> getLastAssignedBatch();
 };

@@ -15,17 +15,19 @@ enum OrderStatus {
 struct Order {
     int id;
     string items;
+
+    // Final dynamic customer location, example: Customer_1000
     string address;
+
+    // Nearest fixed graph node selected by user, example: Town Hall
+    string nearestLocation;
+
+    // Distance from nearest fixed location to customer
+    int userDistance;
+
     bool isVIP;
     OrderStatus status;
     long long timestamp;
     int assignedDriverId;
-
-    bool operator<(const Order& other) const {
-        if (isVIP != other.isVIP) {
-            return !isVIP; // VIP orders get higher priority
-        }
-
-        return id > other.id; // smaller ID first for same priority
-    }
+    int distanceFromRestaurant;
 };

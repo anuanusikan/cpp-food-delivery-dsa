@@ -5,7 +5,11 @@ bool OrderQueue::higherPriority(const Order& a, const Order& b) {
         return a.isVIP;
     }
 
-    return a.id < b.id;
+    if (a.timestamp != b.timestamp) {
+        return a.timestamp < b.timestamp;
+    }
+
+    return a.distanceFromRestaurant < b.distanceFromRestaurant;
 }
 
 void OrderQueue::heapifyUp(int index) {
@@ -52,6 +56,12 @@ void OrderQueue::heapifyDown(int index) {
     }
 }
 
+void OrderQueue::rebuildHeap() {
+    for (int i = heap.size() / 2 - 1; i >= 0; i--) {
+        heapifyDown(i);
+    }
+}
+
 void OrderQueue::push(Order o) {
     heap.push_back(o);
     heapifyUp(heap.size() - 1);
@@ -59,7 +69,7 @@ void OrderQueue::push(Order o) {
 
 Order OrderQueue::pop() {
     if (heap.empty()) {
-        return Order{-1, "", "", false, PENDING, 0, -1};
+       return Order{-1, "", "", "", 0, false, PENDING, 0, -1, 0};
     }
 
     Order root = heap[0];
@@ -72,6 +82,23 @@ Order OrderQueue::pop() {
     }
 
     return root;
+}
+
+bool OrderQueue::removeById(int orderId) {
+    for (int i = 0; i < (int)heap.size(); i++) {
+        if (heap[i].id == orderId) {
+            heap[i] = heap[heap.size() - 1];
+            heap.pop_back();
+
+            if (!heap.empty()) {
+                rebuildHeap();
+            }
+
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool OrderQueue::empty() {

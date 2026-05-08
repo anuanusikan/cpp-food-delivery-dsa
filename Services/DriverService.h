@@ -1,23 +1,31 @@
 #pragma once
-#include <unordered_map>
+#include <vector>
 #include "../models/Driver.h"
 #include "../models/Order.h"
+#include "../ds/Graph.h"
 
 using namespace std;
 
 class DriverService {
 private:
-    unordered_map<int, Driver> drivers;
+    vector<Driver> drivers;
     int nextDriverId;
+
+    int findDriverIndex(int driverId);
 
 public:
     DriverService();
 
     void initDrivers();
+
     bool driverExists(int driverId);
     Driver getDriver(int driverId);
-    bool assignOrder(Order& order);
+
+    int findBestAvailableDriver(Order order, Graph& graph);
+    bool assignOrdersToDriver(int driverId, vector<Order>& orders, Graph& graph);
+
     bool completeDelivery(int driverId);
+
     int totalDrivers();
     int availableDrivers();
 };

@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
+#include <vector>
 
 #include "models/FoodItem.h"
 #include "models/Order.h"
@@ -80,7 +81,12 @@ int main() {
     );
 
     httplib::Server svr;
+
     svr.set_mount_point("/", "./public");
+
+    svr.Get("/", [](const httplib::Request& req, httplib::Response& res) {
+        res.set_redirect("/login.html");
+    });
 
     // ================= AUTH =================
 
@@ -247,7 +253,7 @@ int main() {
         res.set_content(json, "application/json");
     });
 
-    // ================= CHECKOUT =================
+    // ================= CHECKOUT WITH DYNAMIC USER LOCATION =================
 
     svr.Get("/api/checkout", [&](const httplib::Request& req, httplib::Response& res) {
         string session = req.get_param_value("sessionId");
@@ -257,23 +263,35 @@ int main() {
             return;
         }
 
-        string address = req.get_param_value("address");
-        bool vip = req.get_param_value("vip") == "true";
+        try {
+            string nearestLocation = req.get_param_value("nearestLocation");
+            int userDistance = stoi(req.get_param_value("userDistance"));
+            bool vip = req.get_param_value("vip") == "true";
 
-        Order order = orderService.checkout(session, address, vip);
+            Order order = orderService.checkout(session, nearestLocation, userDistance, vip);
 
-        if (order.id == -1) {
-            res.set_content("{\"status\":\"empty_cart\"}", "application/json");
-            return;
+            if (order.id == -1) {
+                res.set_content("{\"status\":\"empty_cart\"}", "application/json");
+                return;
+            }
+
+            auto routeResult = graph.shortestPath("Galle_Restaurant", order.address);
+
+            string json = "{";
+            json += "\"status\":\"success\",";
+            json += "\"order_id\":" + to_string(order.id) + ",";
+            json += "\"deliveryNode\":\"" + jsonEscape(order.address) + "\",";
+            json += "\"nearestLocation\":\"" + jsonEscape(order.nearestLocation) + "\",";
+            json += "\"userDistance\":" + to_string(order.userDistance) + ",";
+            json += "\"totalDistance\":" + to_string(routeResult.first) + ",";
+            json += "\"shortestPath\":\"" + jsonEscape(routeResult.second) + "\",";
+            json += "\"vip\":" + string(order.isVIP ? "true" : "false");
+            json += "}";
+
+            res.set_content(json, "application/json");
+        } catch (...) {
+            res.set_content("{\"status\":\"error\"}", "application/json");
         }
-
-        string json = "{";
-        json += "\"status\":\"success\",";
-        json += "\"order_id\":" + to_string(order.id) + ",";
-        json += "\"vip\":" + string(order.isVIP ? "true" : "false");
-        json += "}";
-
-        res.set_content(json, "application/json");
     });
 
     // ================= ADMIN =================
@@ -285,6 +303,8 @@ int main() {
         bool first = true;
 
         for (auto& order : orders) {
+            auto routeResult = graph.shortestPath("Galle_Restaurant", order.address);
+
             if (!first) {
                 json += ",";
             }
@@ -293,6 +313,10 @@ int main() {
             json += "\"id\":" + to_string(order.id) + ",";
             json += "\"items\":\"" + jsonEscape(order.items) + "\",";
             json += "\"address\":\"" + jsonEscape(order.address) + "\",";
+            json += "\"nearestLocation\":\"" + jsonEscape(order.nearestLocation) + "\",";
+            json += "\"userDistance\":" + to_string(order.userDistance) + ",";
+            json += "\"distanceFromRestaurant\":" + to_string(routeResult.first) + ",";
+            json += "\"shortestPath\":\"" + jsonEscape(routeResult.second) + "\",";
             json += "\"status\":\"" + statusToString(order.status) + "\",";
             json += "\"vip\":" + string(order.isVIP ? "true" : "false");
             json += "}";
@@ -313,10 +337,36 @@ int main() {
             return;
         }
 
+        if (order.id == -2) {
+            res.set_content(
+                "{\"status\":\"waiting\",\"message\":\"No available drivers. Order kept in queue.\"}",
+                "application/json"
+            );
+            return;
+        }
+
+        vector<Order> batch = orderService.getLastAssignedBatch();
+
+        string orderIds = "";
+        string orderLocations = "";
+
+        for (int i = 0; i < (int)batch.size(); i++) {
+            orderIds += "#" + to_string(batch[i].id);
+            orderLocations += batch[i].address;
+
+            if (i < (int)batch.size() - 1) {
+                orderIds += ", ";
+                orderLocations += " -> ";
+            }
+        }
+
         string json = "{";
         json += "\"status\":\"success\",";
         json += "\"order_id\":" + to_string(order.id) + ",";
-        json += "\"assignedDriverId\":" + to_string(order.assignedDriverId);
+        json += "\"assignedDriverId\":" + to_string(order.assignedDriverId) + ",";
+        json += "\"batchCount\":" + to_string(batch.size()) + ",";
+        json += "\"orderIds\":\"" + jsonEscape(orderIds) + "\",";
+        json += "\"locations\":\"" + jsonEscape(orderLocations) + "\"";
         json += "}";
 
         res.set_content(json, "application/json");
@@ -369,16 +419,38 @@ int main() {
 
             Driver driver = driverService.getDriver(driverId);
 
-            if (driver.currentOrderId == -1) {
+            if (driver.activeOrderCount == 0) {
                 res.set_content("{}", "application/json");
                 return;
             }
 
+            string ids = "";
+            string items = "";
+            string addresses = "";
+
+            for (int i = 0; i < (int)driver.assignedOrderIds.size(); i++) {
+                ids += "#" + to_string(driver.assignedOrderIds[i]);
+                items += driver.assignedItems[i];
+                addresses += driver.assignedAddresses[i];
+
+                if (i < (int)driver.assignedOrderIds.size() - 1) {
+                    ids += ", ";
+                    items += " | ";
+                    addresses += " -> ";
+                }
+            }
+
             string json = "{";
-            json += "\"id\":" + to_string(driver.currentOrderId) + ",";
-            json += "\"items\":\"" + jsonEscape(driver.currentItems) + "\",";
-            json += "\"address\":\"" + jsonEscape(driver.currentAddress) + "\",";
+            json += "\"id\":" + to_string(driver.assignedOrderIds[0]) + ",";
+            json += "\"orderIds\":\"" + jsonEscape(ids) + "\",";
+            json += "\"items\":\"" + jsonEscape(items) + "\",";
+            json += "\"address\":\"" + jsonEscape(addresses) + "\",";
             json += "\"status\":\"IN_DELIVERY\",";
+            json += "\"driverLocation\":\"" + jsonEscape(driver.currentLocation) + "\",";
+            json += "\"activeOrderCount\":" + to_string(driver.activeOrderCount) + ",";
+            json += "\"deliverySequence\":\"" + jsonEscape(driver.deliverySequence) + "\",";
+            json += "\"optimizedRoute\":\"" + jsonEscape(driver.optimizedRoute) + "\",";
+            json += "\"totalDistance\":" + to_string(driver.totalDistance) + ",";
             json += "\"completedDeliveries\":" + to_string(driver.completedDeliveries);
             json += "}";
 
@@ -409,7 +481,7 @@ int main() {
     svr.Get("/api/route", [&](const httplib::Request& req, httplib::Response& res) {
         string dest = req.get_param_value("dest");
 
-        auto result = graph.shortestPath(dest);
+        auto result = graph.shortestPath("Galle_Restaurant", dest);
 
         string json = "{";
         json += "\"distance\":" + to_string(result.first) + ",";
@@ -470,8 +542,9 @@ int main() {
     cout << "====================================================\n";
     cout << " Smart Food Delivery System Running\n";
     cout << " URL: http://localhost:8080/login.html\n";
-    cout << " DSA: HashMap, LinkedList, Trie, PriorityQueue,\n";
-    cout << "      Stack, Graph, Dijkstra, Sorting\n";
+    cout << " Graph Start Node: Galle_Restaurant\n";
+    cout << " DSA: Manual HashMap, LinkedList Cart, Manual Heap,\n";
+    cout << "      Stack, Trie, Graph, Dijkstra, Smart Delivery\n";
     cout << "====================================================\n";
 
     svr.listen("localhost", 8080);

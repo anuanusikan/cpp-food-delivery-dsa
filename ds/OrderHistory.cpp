@@ -26,7 +26,7 @@ void OrderHistory::push(Order o) {
 
 Order OrderHistory::undo() {
     if (topNode == nullptr) {
-        return Order{-1, "", "", false, PENDING, 0, -1};
+        return Order{-1, "", "", "", 0, false, PENDING, 0, -1, 0};
     }
 
     HistoryNode* temp = topNode;

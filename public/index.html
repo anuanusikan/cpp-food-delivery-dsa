@@ -50,7 +50,7 @@
             border-left: 4px solid #3b82f6;
         }
 
-        input {
+        input, select {
             padding: 12px;
             margin: 5px;
             border-radius: 6px;
@@ -161,7 +161,6 @@
 </head>
 <body>
 
-<!-- NAVIGATION -->
 <div class="navbar">
     <button id="userNav" onclick="switchView('user')">User Dashboard</button>
     <button id="adminNav" onclick="switchView('admin')">Admin Dashboard</button>
@@ -169,14 +168,14 @@
     <button class="btn-danger" onclick="logout()">Logout</button>
 </div>
 
-<!-- USER DASHBOARD -->
 <div id="user" class="view">
     <h2 class="role-title">User Dashboard - Smart Food Restaurant</h2>
 
     <div class="card">
         <p id="sessionInfo">Checking login...</p>
         <p class="info">
-            DSA used: Hash Map for authentication, Doubly Linked List for cart, Trie/search support for menu.
+            Select the nearest delivery zone in Galle and enter your distance from that zone.
+            The system creates a dynamic customer node in the graph.
         </p>
     </div>
 
@@ -194,8 +193,23 @@
                 <h3>Your Cart</h3>
                 <div id="cartList">Cart is empty</div>
 
-                <h3>Delivery Address</h3>
-                <input id="userDest" placeholder="Enter address" value="Customer_Home">
+                <h3>Delivery Details</h3>
+
+                <label class="info">Nearest known delivery zone</label><br>
+                <select id="nearestLocation">
+                    <option value="Engineering_Faculty">Engineering Faculty</option>
+                    <option value="Wakwella">Wakwella</option>
+                    <option value="Karapitiya_Medical_Faculty">Karapitiya Medical Faculty</option>
+                    <option value="Allied_Health_Campus">Allied Health Campus</option>
+                    <option value="Hikkaduwa">Hikkaduwa</option>
+                    <option value="Hapugala">Hapugala</option>
+                    <option value="Galle_Hospital">Galle Hospital</option>
+                </select>
+
+                <br>
+
+                <label class="info">Distance from selected zone in km</label><br>
+                <input id="userDistance" type="number" min="1" placeholder="Example: 2">
 
                 <br>
                 <button class="btn-success" onclick="checkout(false)">Standard Checkout</button>
@@ -205,13 +219,12 @@
     </div>
 </div>
 
-<!-- ADMIN DASHBOARD -->
 <div id="admin" class="view">
     <h2 class="role-title">Admin Dashboard - Smart Food Restaurant</h2>
 
     <div class="card">
         <p class="info">
-            Admin manages one restaurant menu. Food added here is shown to all users.
+            Admin manages one restaurant menu. Orders are prioritized by VIP status, order time, and distance.
         </p>
     </div>
 
@@ -227,7 +240,7 @@
     <div class="card">
         <h3>Kitchen Queue - Priority Queue</h3>
         <p class="info">
-            VIP orders are processed before normal orders using a heap-based priority queue.
+            If all drivers are busy, the order remains in the queue instead of assigning driver -1.
         </p>
         <button class="btn-success" onclick="processAdmin()">Process Next Order</button>
         <button onclick="undoAdmin()">Undo Last Processed</button>
@@ -237,9 +250,6 @@
 
     <div class="card">
         <h3>Popular Items - Analytics</h3>
-        <p class="info">
-            Ordered items are counted and sorted to find popular food items.
-        </p>
         <button onclick="loadPopularItems()">Load Popular Items</button>
         <div id="popularItemsList"></div>
     </div>
@@ -250,7 +260,6 @@
     </div>
 </div>
 
-<!-- DRIVER DASHBOARD -->
 <div id="driver" class="view">
     <h2 class="role-title">Driver Dashboard</h2>
 
@@ -258,7 +267,7 @@
         <h3>Driver Status</h3>
         <p id="driverStatus">Checking driver...</p>
         <p class="info">
-            Drivers receive assigned orders and calculate the shortest path using graph and Dijkstra algorithm.
+            Driver receives optimized delivery route using Dijkstra shortest path through the Galle graph.
         </p>
         <button class="btn-success" onclick="loadDriver()">Refresh Assignment</button>
     </div>
@@ -278,9 +287,6 @@
 <script>
 let currentSessionId = null;
 let currentDriverId = null;
-let currentDeliveryAddress = "";
-
-// ================= AUTH / ROLE CHECK =================
 
 async function checkAuth() {
     const role = localStorage.getItem("role");
@@ -403,8 +409,6 @@ async function logout() {
     window.location.href = "/login.html";
 }
 
-// ================= REFRESH =================
-
 async function refreshAll() {
     const role = localStorage.getItem("role");
 
@@ -425,7 +429,7 @@ async function refreshAll() {
     }
 }
 
-// ================= USER FUNCTIONS =================
+// ================= USER =================
 
 async function loadMenu() {
     const qElement = document.getElementById("searchBar");
@@ -510,10 +514,16 @@ async function loadCart() {
 }
 
 async function checkout(isVIP) {
-    const address = document.getElementById("userDest").value;
+    const nearestLocation = document.getElementById("nearestLocation").value;
+    const userDistance = document.getElementById("userDistance").value;
 
-    if (!address) {
-        alert("Please enter delivery address.");
+    if (!nearestLocation) {
+        alert("Please select nearest location.");
+        return;
+    }
+
+    if (!userDistance || Number(userDistance) <= 0) {
+        alert("Please enter valid distance from selected zone.");
         return;
     }
 
@@ -523,13 +533,20 @@ async function checkout(isVIP) {
     }
 
     const res = await fetch(
-        `/api/checkout?sessionId=${encodeURIComponent(currentSessionId)}&vip=${isVIP}&address=${encodeURIComponent(address)}`
+        `/api/checkout?sessionId=${encodeURIComponent(currentSessionId)}&vip=${isVIP}&nearestLocation=${encodeURIComponent(nearestLocation)}&userDistance=${encodeURIComponent(userDistance)}`
     );
 
     const data = await res.json();
 
     if (data.status === "success") {
-        alert(`Order #${data.order_id} placed successfully.`);
+        alert(
+            `Order #${data.order_id} placed successfully.\n` +
+            `Nearest zone: ${data.nearestLocation}\n` +
+            `Distance from zone: ${data.userDistance} km\n` +
+            `Total shortest distance: ${data.totalDistance} km`
+        );
+
+        document.getElementById("userDistance").value = "";
         loadCart();
     } else if (data.status === "empty_cart") {
         alert("Cart is empty.");
@@ -538,7 +555,7 @@ async function checkout(isVIP) {
     }
 }
 
-// ================= ADMIN FUNCTIONS =================
+// ================= ADMIN =================
 
 async function addNewFood() {
     const id = document.getElementById("newId").value;
@@ -585,7 +602,11 @@ async function loadAdminQueue() {
                     ${order.vip ? '<span class="badge">VIP</span>' : ''}
                     <br>
                     Items: ${order.items}<br>
-                    Address: ${order.address}<br>
+                    Delivery Node: ${order.address}<br>
+                    Nearest Zone: ${order.nearestLocation}<br>
+                    User Distance: ${order.userDistance} km<br>
+                    Shortest Path: ${order.shortestPath}<br>
+                    Shortest Distance: ${order.distanceFromRestaurant} km<br>
                     Status: ${order.status}
                 </div>
             </div>
@@ -604,7 +625,14 @@ async function processAdmin() {
     const data = await res.json();
 
     if (data.status === "success") {
-        alert(`Order #${data.order_id} processed. Driver: ${data.assignedDriverId}`);
+        alert(
+            `Driver ${data.assignedDriverId} assigned.\n` +
+            `Orders: ${data.orderIds}\n` +
+            `Locations: ${data.locations}`
+        );
+        refreshAll();
+    } else if (data.status === "waiting") {
+        alert("No available drivers. Order is kept waiting in the priority queue.");
         refreshAll();
     } else {
         alert("Queue is empty.");
@@ -669,7 +697,7 @@ async function loadSystemStats() {
     }
 }
 
-// ================= DRIVER FUNCTIONS =================
+// ================= DRIVER =================
 
 async function loadDriver() {
     if (!currentDriverId) {
@@ -682,39 +710,27 @@ async function loadDriver() {
     const data = await res.json();
 
     if (data.id) {
-        currentDeliveryAddress = data.address;
-
         document.getElementById("deliveryInfo").innerHTML = `
-            <p><strong>Order #${data.id}</strong></p>
-            <p>Items: ${data.items}</p>
-            <p>Address: ${data.address}</p>
-            <p>Status: ${data.status}</p>
-            <button class="btn-success" onclick="getRoute()">Calculate Route</button>
+            <p><strong>Assigned Orders:</strong> ${data.orderIds}</p>
+            <p><strong>Items:</strong> ${data.items}</p>
+            <p><strong>Delivery Nodes:</strong> ${data.address}</p>
+            <p><strong>Status:</strong> ${data.status}</p>
+            <p><strong>Driver Current Location:</strong> ${data.driverLocation}</p>
+            <p><strong>Active Order Count:</strong> ${data.activeOrderCount}</p>
+            <p><strong>Delivery Sequence:</strong> ${data.deliverySequence}</p>
+
+            <div class="route">
+                <strong>Shortest Delivery Path Using Dijkstra</strong><br>
+                ${data.optimizedRoute}<br><br>
+                <strong>Total Distance:</strong> ${data.totalDistance} km
+            </div>
+
             <button class="btn-warning" onclick="completeDelivery()">Complete Delivery</button>
         `;
     } else {
-        currentDeliveryAddress = "";
         document.getElementById("deliveryInfo").innerHTML = "<p>No current delivery.</p>";
         document.getElementById("routeBox").innerHTML = "";
     }
-}
-
-async function getRoute() {
-    if (!currentDeliveryAddress) {
-        alert("No address assigned.");
-        return;
-    }
-
-    const res = await fetch(`/api/route?dest=${encodeURIComponent(currentDeliveryAddress)}`);
-    const data = await res.json();
-
-    document.getElementById("routeBox").innerHTML = `
-        <div class="route">
-            <strong>Dijkstra Shortest Route</strong><br>
-            Path: ${data.path}<br>
-            Distance: ${data.distance} km
-        </div>
-    `;
 }
 
 async function completeDelivery() {
@@ -729,8 +745,6 @@ async function completeDelivery() {
         alert("Could not complete delivery.");
     }
 }
-
-// ================= START =================
 
 window.addEventListener("DOMContentLoaded", async () => {
     await checkAuth();
