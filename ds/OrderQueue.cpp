@@ -69,7 +69,7 @@ void OrderQueue::push(Order o) {
 
 Order OrderQueue::pop() {
     if (heap.empty()) {
-       return Order{-1, "", "", "", 0, false, PENDING, 0, -1, 0};
+       return Order{-1, "", "", "", "", 0, false, PENDING, 0, -1, 0};
     }
 
     Order root = heap[0];
@@ -82,6 +82,35 @@ Order OrderQueue::pop() {
     }
 
     return root;
+}
+
+bool OrderQueue::removeByIdAndSession(int orderId, string sessionId) {
+    for (int i = 0; i < (int)heap.size(); i++) {
+        if (heap[i].id == orderId && heap[i].sessionId == sessionId) {
+            heap[i] = heap[heap.size() - 1];
+            heap.pop_back();
+
+            if (!heap.empty()) {
+                rebuildHeap();
+            }
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+vector<Order> OrderQueue::getBySession(string sessionId) {
+    vector<Order> result;
+
+    for (Order order : heap) {
+        if (order.sessionId == sessionId) {
+            result.push_back(order);
+        }
+    }
+
+    return result;
 }
 
 bool OrderQueue::removeById(int orderId) {

@@ -19,7 +19,7 @@ OrderService::OrderService(
 
 Order OrderService::checkout(string sessionId, string nearestLocation, int userDistance, bool isVIP) {
     if (cartManager.isCartEmpty(sessionId)) {
-        return Order{-1, "", "", "", 0, false, PENDING, 0, -1, 0};
+       return Order{-1, "", "", "", "", 0, false, PENDING, 0, -1, 0};
     }
 
     string items = cartManager.getItemsAsString(sessionId);
@@ -33,17 +33,18 @@ Order OrderService::checkout(string sessionId, string nearestLocation, int userD
 
     graph.addDynamicUserLocation(customerNode, nearestLocation, userDistance);
 
-    Order order;
-    order.id = newOrderId;
-    order.items = items;
-    order.address = customerNode;
-    order.nearestLocation = nearestLocation;
-    order.userDistance = userDistance;
-    order.isVIP = isVIP;
-    order.status = PENDING;
-    order.timestamp = chrono::system_clock::now().time_since_epoch().count();
-    order.assignedDriverId = -1;
-    order.distanceFromRestaurant = graph.distanceBetween("Galle_Restaurant", customerNode);
+  Order order;
+order.id = newOrderId;
+order.sessionId = sessionId;
+order.items = items;
+order.address = customerNode;
+order.nearestLocation = nearestLocation;
+order.userDistance = userDistance;
+order.isVIP = isVIP;
+order.status = PENDING;
+order.timestamp = chrono::system_clock::now().time_since_epoch().count();
+order.assignedDriverId = -1;
+order.distanceFromRestaurant = graph.distanceBetween("Galle_Restaurant", customerNode);
 
     orderQueue.push(order);
 
@@ -54,7 +55,7 @@ Order OrderService::processNextOrder() {
     lastAssignedBatch.clear();
 
     if (orderQueue.empty()) {
-        return Order{-1, "", "", "", 0, false, PENDING, 0, -1, 0};
+        return Order{-1, "", "", "", "", 0, false, PENDING, 0, -1, 0};
     }
 
     Order mainOrder = orderQueue.pop();
@@ -67,7 +68,7 @@ Order OrderService::processNextOrder() {
         mainOrder.assignedDriverId = -1;
         orderQueue.push(mainOrder);
 
-        return Order{-2, "", "", "", 0, false, PENDING, 0, -1, 0};
+        return Order{-2, "", "", "", "", 0, false, PENDING, 0, -1, 0};
     }
 
     vector<Order> batch;
@@ -107,7 +108,7 @@ Order OrderService::processNextOrder() {
             orderQueue.push(order);
         }
 
-        return Order{-2, "", "", "", 0, false, PENDING, 0, -1, 0};
+        return Order{-2, "", "", "", "", 0, false, PENDING, 0, -1, 0};
     }
 
     for (Order order : batch) {
@@ -121,7 +122,7 @@ Order OrderService::processNextOrder() {
 
 Order OrderService::undoLastOrder() {
     if (orderHistory.empty()) {
-        return Order{-1, "", "", "", 0, false, PENDING, 0, -1, 0};
+        return Order{-1, "", "", "", "", 0, false, PENDING, 0, -1, 0};
     }
 
     Order order = orderHistory.undo();
@@ -136,4 +137,12 @@ Order OrderService::undoLastOrder() {
 
 vector<Order> OrderService::getLastAssignedBatch() {
     return lastAssignedBatch;
+}
+
+bool OrderService::cancelPendingOrder(int orderId, string sessionId) {
+    return orderQueue.removeByIdAndSession(orderId, sessionId);
+}
+
+vector<Order> OrderService::getUserPendingOrders(string sessionId) {
+    return orderQueue.getBySession(sessionId);
 }

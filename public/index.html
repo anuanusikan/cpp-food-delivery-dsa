@@ -157,6 +157,12 @@
         .role-title {
             color: #38bdf8;
         }
+
+        hr {
+            border: none;
+            border-top: 1px solid #334155;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
@@ -214,6 +220,13 @@
                 <br>
                 <button class="btn-success" onclick="checkout(false)">Standard Checkout</button>
                 <button class="btn-warning" onclick="checkout(true)">VIP Checkout</button>
+
+                <hr>
+
+                <h3>My Pending Orders</h3>
+                <p class="info">You can cancel only before the admin processes the order.</p>
+                <button onclick="loadUserOrders()">Refresh Orders</button>
+                <div id="userOrdersList"></div>
             </div>
         </div>
     </div>
@@ -415,6 +428,7 @@ async function refreshAll() {
     if (role === "user") {
         await loadMenu();
         await loadCart();
+        await loadUserOrders();
     }
 
     if (role === "admin") {
@@ -548,10 +562,76 @@ async function checkout(isVIP) {
 
         document.getElementById("userDistance").value = "";
         loadCart();
+        loadUserOrders();
     } else if (data.status === "empty_cart") {
         alert("Cart is empty.");
     } else {
         alert("Checkout failed.");
+    }
+}
+
+async function loadUserOrders() {
+    if (!currentSessionId) return;
+
+    const res = await fetch(`/api/user/orders?sessionId=${encodeURIComponent(currentSessionId)}`);
+    const data = await res.json();
+
+    let html = "";
+
+    data.forEach(order => {
+        html += `
+            <div class="item">
+                <div>
+                    <strong>Order #${order.id}</strong>
+                    ${order.vip ? '<span class="badge">VIP</span>' : ''}
+                    <br>
+                    Items: ${order.items}<br>
+                    Delivery Node: ${order.address}<br>
+                    Nearest Zone: ${order.nearestLocation}<br>
+                    Distance from Zone: ${order.userDistance} km<br>
+                    Total Distance: ${order.distanceFromRestaurant} km<br>
+                    Status: ${order.status}
+                </div>
+                <button class="btn-danger" onclick="cancelOrder(${order.id})">
+                    Cancel
+                </button>
+            </div>
+        `;
+    });
+
+    if (!html) {
+        html = "<p>No pending orders.</p>";
+    }
+
+    document.getElementById("userOrdersList").innerHTML = html;
+}
+
+async function cancelOrder(orderId) {
+    if (!currentSessionId) {
+        alert("Please login again.");
+        return;
+    }
+
+    const confirmCancel = confirm(`Cancel Order #${orderId}?`);
+
+    if (!confirmCancel) {
+        return;
+    }
+
+    const res = await fetch(
+        `/api/user/cancel?sessionId=${encodeURIComponent(currentSessionId)}&orderId=${orderId}`
+    );
+
+    const data = await res.json();
+
+    if (data.status === "cancelled") {
+        alert("Order cancelled successfully.");
+        loadUserOrders();
+    } else if (data.status === "not_allowed") {
+        alert("Cannot cancel this order. It may already be processed.");
+        loadUserOrders();
+    } else {
+        alert("Cancel failed.");
     }
 }
 

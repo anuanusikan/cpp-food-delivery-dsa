@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string>
 #include "../models/Order.h"
 
 using namespace std;
@@ -18,6 +19,9 @@ public:
     Order pop();
 
     bool removeById(int orderId);
+    bool removeByIdAndSession(int orderId, string sessionId);
+
+    vector<Order> getBySession(string sessionId);
 
     bool empty();
     int size();
