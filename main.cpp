@@ -48,6 +48,7 @@ string statusToString(OrderStatus status) {
         case ASSIGNED: return "ASSIGNED";
         case IN_DELIVERY: return "IN_DELIVERY";
         case DELIVERED: return "DELIVERED";
+        case CANCELLED: return "CANCELLED";
         default: return "UNKNOWN";
     }
 }
@@ -289,6 +290,73 @@ int main() {
             json += "}";
 
             res.set_content(json, "application/json");
+        } catch (...) {
+            res.set_content("{\"status\":\"error\"}", "application/json");
+        }
+    });
+
+    // ================= USER ORDERS / CANCEL =================
+
+    svr.Get("/api/user/orders", [&](const httplib::Request& req, httplib::Response& res) {
+        string session = req.get_param_value("sessionId");
+
+        if (!authService.checkSession(session)) {
+            res.set_content("[]", "application/json");
+            return;
+        }
+
+        vector<Order> orders = orderService.getUserPendingOrders(session);
+
+        string json = "[";
+        bool first = true;
+
+        for (Order& order : orders) {
+            if (!first) {
+                json += ",";
+            }
+
+            auto routeResult = graph.shortestPath("Galle_Restaurant", order.address);
+
+            json += "{";
+            json += "\"id\":" + to_string(order.id) + ",";
+            json += "\"items\":\"" + jsonEscape(order.items) + "\",";
+            json += "\"address\":\"" + jsonEscape(order.address) + "\",";
+            json += "\"nearestLocation\":\"" + jsonEscape(order.nearestLocation) + "\",";
+            json += "\"userDistance\":" + to_string(order.userDistance) + ",";
+            json += "\"distanceFromRestaurant\":" + to_string(routeResult.first) + ",";
+            json += "\"status\":\"" + statusToString(order.status) + "\",";
+            json += "\"vip\":" + string(order.isVIP ? "true" : "false");
+            json += "}";
+
+            first = false;
+        }
+
+        json += "]";
+
+        res.set_content(json, "application/json");
+    });
+
+    svr.Get("/api/user/cancel", [&](const httplib::Request& req, httplib::Response& res) {
+        string session = req.get_param_value("sessionId");
+
+        if (!authService.checkSession(session)) {
+            res.set_content("{\"status\":\"unauthorized\"}", "application/json");
+            return;
+        }
+
+        try {
+            int orderId = stoi(req.get_param_value("orderId"));
+
+            bool cancelled = orderService.cancelPendingOrder(orderId, session);
+
+            if (cancelled) {
+                res.set_content("{\"status\":\"cancelled\"}", "application/json");
+            } else {
+                res.set_content(
+                    "{\"status\":\"not_allowed\",\"message\":\"Order cannot be cancelled because it may already be processed or does not belong to this user.\"}",
+                    "application/json"
+                );
+            }
         } catch (...) {
             res.set_content("{\"status\":\"error\"}", "application/json");
         }
